@@ -148,7 +148,6 @@ function initHandlers() {
   $('#print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
-  $('#edit-vacation').popover();
   $('#edit-holiday').change(toggleHoliday);
   $('#settings-save').click(saveSettings);
 }
@@ -623,7 +622,8 @@ function toggleHoliday() {
   }
   else {
     $('.non-holiday').prop('disabled', false);
-    $('.btn-hours').removeClass('btn-hours-disabled');
+    $('#add').removeClass('btn-hours-disabled');
+    $('#remove').prop('disabled', true);
     $('#holiday-status').html('No');
   }
 }
