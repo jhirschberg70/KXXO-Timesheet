@@ -1,0 +1,83 @@
+body {
+  background:rgb(245,245,245);
+  font-family:'Nunito', sans-serif;
+  //  font-family:'Roboto', sans-serif;
+}
+
+label {
+  font-size:1rem;
+}
+
+.arrive, .leave {
+  border:3px solid red;
+  border-radius:4px;
+}
+
+.bootstrap-datetimepicker-widget table td,
+.bootstrap-datetimepicker-widget table td span {
+  height:36px;
+  line-height:36px;
+  padding-top:0;
+  padding-bottom:0;
+  margin-top:0;
+  margin-bottom:0;
+}
+
+.bootstrap-datetimepicker-widget .timepicker-hour,
+.bootstrap-datetimepicker-widget .timepicker-minute {
+  font-size:16px;
+  font-weight:normal;
+}
+
+.border-gray {
+  border:1px solid rgb(206,212,218);border-radius:4px;
+}
+
+.btn-circle {
+  border-radius:50%;
+  padding:0;
+  width:1.5rem;
+  height:1.5rem;
+  margin-top:-1px;
+}
+
+.btn-circle:hover {
+  background:rgb(206,212,218);
+}
+
+.btn-circle:focus, btn-circle:active {
+  box-shadow:none; // controls outline of button in bootstrap after it's clicked
+}
+
+.btn-hours-disabled {
+  color:rgb(233,236,239);
+}
+
+.btn-hours-disabled:hover {
+  color:rgb(233,236,239);
+  background:transparent;
+}
+
+.card {
+  margin-bottom:1rem;
+  border-radius:0;
+}
+
+.card-header {
+  background:rgb(248,249,252);
+  color:blue;
+}
+
+.valid {
+  border:1px solid rgb(206,212,218);
+}
+
+label.custom-control-label {
+  position: relative;
+  padding-right: 2.3rem;
+}
+
+label.custom-control-label::before, label.custom-control-label::after{
+  right: 0;
+  left: auto;
+}

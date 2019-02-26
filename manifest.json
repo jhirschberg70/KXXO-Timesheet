@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "KXXO Timesheet",
+  "description": "Enter and print timesheet for KXXO",
+  "version": "1.0.1",
+  "background": {
+    "scripts": ["js/background.js"]
+  },
+  "browser_action": {
+    "default_title": "KXXO Timesheet 1.0.1"
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "<all_urls>"
+  ]
+}

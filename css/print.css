@@ -1,0 +1,139 @@
+@page {
+  size:  auto;   /* auto is the initial value */
+  margin: 0mm;  /* this affects the margin in the printer settings */
+}
+
+html {
+
+  margin: 0px;  /* this affects the margin on the html before sending to printer */
+}
+
+body {
+  margin: 0mm; /* margin you want for the content */
+  width:215.9mm;
+  font-family:Arial;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+tr {
+  height:6mm;
+}
+
+td {
+  border:1px solid #000;
+  font-size:4mm;
+  text-align:center;
+}
+
+div#logo {
+  float:left;
+  width:95mm;
+  padding-left:10mm;
+  padding-top:12mm;
+}
+
+div#logo img {
+  width:83mm;
+}
+
+div#name {
+  padding-top:7mm;
+  font-size:4.5mm;
+  font-weight:bold;
+}
+
+div#info {
+  float:right;
+  padding-top:12.5mm;
+  padding-right:34.5mm;
+  font-weight:bold;
+}
+
+div#company {
+  text-align:center;
+  padding-bottom:2.5mm;
+  font-size:5.5mm;
+}
+
+div#due {
+  text-align:center;
+  border:1px solid #000;
+  padding-top:1.5mm;
+  padding-bottom:1.5mm;
+  padding-left:5.5mm;
+  padding-right:5.5mm;
+  font-size:4.5mm;
+}
+
+div#range {
+  padding-top:4mm;
+  font-size:4.5mm;
+}
+
+div#hours {
+  padding-left:8mm;
+  padding-right:8mm;
+  padding-top:6mm;
+}
+
+div#due {
+  font-family: "Times New Roman";
+}
+
+table#printTable {
+  padding-top:2mm;
+}
+
+div#summary {
+  padding-left:10mm;
+}
+
+.shaded {
+  background-color:#ededed;
+  -webkit-print-color-adjust: exact;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.headings {
+  height:5mm;
+  font-size:4.5mm;
+  font-weight:bold;
+}
+
+.date {
+  width:26mm;
+}
+
+.hoursWorked {
+  width:33mm;
+}
+
+.hours {
+  width:21mm;
+}
+
+.activities {
+  width:119mm;
+}
+
+.activitiesText {
+  text-align:left;
+  padding-left:2mm;
+}
+
+.total {
+  display:inline-block;
+  border-bottom:1px solid rgb(0,0,0);
+  text-align:right;
+  overflow:visible;
+}

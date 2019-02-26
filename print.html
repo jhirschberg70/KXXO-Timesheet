@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Print KXXO Timesheet</title>
+    <link rel="stylesheet" type="text/css" href="css/print.css">
+  </head>
+  <body>
+    <div id="logo">
+      <img src="images/print_logo.png"/>
+      <div id="name">Name:&nbsp<span id="name"></span></div>
+    </div>
+    <div id="info">
+      <div id="company">3 Cities, Inc.<br/>Time Sheets Due:</div>
+      <div id="due" class="shaded"><span id="due-date"></span></div>
+      <div id="range">Dates <span id="dates"></span></div>
+    </div>
+    <div id="hours" style="clear:both;">
+      <table id="print-table">
+	<tr class="headings shaded">
+	  <td class="date">Date</td>
+	  <td class="hoursWorked">Hours Worked</td>
+	  <td class="hours"># Hours</td>
+	  <td class="activities">Activities</td>
+	</tr>
+      </table>
+    </div>
+    <br/>
+    <div id="summary">
+      <div class="bold">Total hours to be paid: <div id="total-hours-paid" class="total" style="min-width:74.5px;"></div></div>
+      <br/>
+      <br/>
+      <div>Total hours worked: <div id="total-hours-worked" class="total" style="width:99px;"></div></div>
+      <div>Plus <span class="bold">sick</span> leave taken: <div id="sick" class="total" style="width:85px;"></div></div>
+      <div>Plus <span class="bold">vacation</span> time taken: <div id="vacation" class="total" style="width:65.5px;"></div></div>
+      <div>Plus <span class="bold">holiday</span> time taken: <div id="holiday" class="total" style="width:72px;"></div></div>
+      <div>Plus <span class="bold">comp. </span> time taken: <div id="comp" class="total" style="width:79px;"></div></div>
+      <div>Minus <span class="bold">comp. </span> time taken: <div id="minus-comp" class="total" style="width:70px;"></div></div>
+    </div>
+  </body>
+</html>
