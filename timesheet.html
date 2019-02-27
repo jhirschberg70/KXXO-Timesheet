@@ -13,126 +13,97 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/tempusdominus-bootstrap-4.css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,500,700" rel="stylesheet">
     <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700" rel="stylesheet"> -->
     <link rel="stylesheet" type="text/css" href="css/timesheet.css">
   </head>
   <body>
-    <div id="main" class="container-fluid">
-      <div id="header" class="mb-3">
-      </div>
-      <div class="row mx-n1">
-	<div class="offset-lg-1 offset-xl-2 col-md-6 col-lg-5 col-xl-4 px-2">
-	  <div id="daily-activities" class="card">
-	    <h4 class="blue card-header">Daily Activities</h4>
-	    <div class="card-body">
-	      <div class="row">
-		<div class="col">
-		  <div id="set-date" class="border-gray border-top-0">
-		  </div>
-		</div>
-	      </div>
-	      <hr>
-	      <div class="form-row form-group">
-		<div class="col-3">
-		  <div class="d-block">
-		    <label>Holiday</label>
-		  </div>
-		  <div class="custom-control custom-switch">
-		    <input type="checkbox" class="custom-control-input" id="edit-holiday">
-		    <label class="custom-control-label" for="edit-holiday"><span id="holiday-status">No</span></label>
-		  </div>
-		</div>
-		<div class="col">
-		  <label>Activities</label>
-		  <input type="text" id="edit-activities" class="form-control form-control-sm" value=""/>
-		</div>
-	      </div>
-	      <div class="form-row form-group">
-		<div class="col">
-		  <label>Vacation</label>
-		  <select id="edit-vacation" class="custom-select custom-select-sm edit-select non-holiday">
-		  </select>
-		</div>
-		<div class="col">
-		  <label>Sick Leave</label>
-		  <select id="edit-sick" class="custom-select custom-select-sm edit-select non-holiday">
-		  </select>
-		</div>
-	      </div>
-	      <div class="form-row form-group">
-		<div class="col">
-		  <label>Hours Worked</label>
-		  <button id="add" class="btn btn-circle btn-hours non-holiday"><div style="margin-top:-2px;">+</div></button>
-		  <button id="remove" class="btn btn-circle btn-hours btn-hours-disabled non-holiday" disabled><div style="margin-top:-2px;">-</button>
-		  <div id="edit-hours-worked">
-		  </div>
-		</div>
-	      </div>
-	    </div>
-	  </div>
+    <ul class="navbar-nav sidebar d-flex bg-gradient-primary pt-4">
+      <li class="nav-item">
+	<a id="print" class="nav-link" href="#">
+	  <i class="fa fa-lg fa-print fw"></i>
+	  <span class="link-text">&nbsp; Print</span>
+	</a>
+      </li>
+      <li class="nav-item">
+	<a id="settings" class="nav-link" href="#">
+	  <i class="fa fa-lg fa-cog fw"></i>
+	  <span class="link-text">&nbsp; Settings</span>
+	</a>
+      </li>
+    </ul>
+    <div id="wrapper">
+      <div id="main" class="container-fluid">
+	<div id="header" class="mb-3">
 	</div>
-	<div class="col-md-6 col-lg-5 col-xl-4 px-2">
-	  <div class="row">
-	    <div class="col">
-	      <div id="notes" class="card">
-		<h4 class="blue card-header">Notes</h4>
-		<div class="card-body">
-		  Notes go here
-		</div>
-	      </div>
-	    </div>
-	  </div>
-	  <div class="row">
-	    <div class="col">
-	      <div id="summary" class="card">
-		<h4 class="blue card-header">Summary</h4>
-		<div class="card-body">
-		  Summary goes here
-		</div>
-	      </div>
-	    </div>
-	  </div>
-	  <div class="row">
-	    <div class="col">
-	      <div id="settings" class="card">
-		<h4 class="blue card-header">Settings</h4>
-		<div class="card-body">
-		  <div class="form-row form-group">
-		    <div class="col">
-		      <label>Name</label>
-		      <input type="text" id="settings-name" class="form-control form-control-sm" value=""/>
-		    </div>
-		    <div class="col">
-		      <label>Hours/Day</label>
-		      <select id="settings-hours-per-day" class="custom-select custom-select-sm non-holiday">
-			<option value="0">Choose hours</option>
-			<option value="1">4</option>
-			<option value="2">6</option>
-			<option value="3">8</option>
-		      </select>
-		    </div>
-		    <div class="col">
-		      <label>Time Step</label>
-		      <select id="settings-time-step" class="custom-select custom-select-sm non-holiday">
-			<option value="0">Choose minutes</option>
-			<option value="1">5</option>
-			<option value="2">10</option>
-			<option value="3">15</option>
-			<option value="4">30</option>
-			<option value="5">60</option>
-		      </select>
+	<div class="row mx-n1">
+	  <div class="col-md-6 px-2">
+	    <div id="daily-activities" class="card shadow">
+	      <h4 class="blue card-header">Daily Activities</h4>
+	      <div class="card-body">
+		<div class="row">
+		  <div class="col">
+		    <div id="set-date" class="border-gray border-top-0">
 		    </div>
 		  </div>
-		  <br/>
-		  <div class="form-row">
-		    <div class="col">
+		</div>
+		<hr>
+		<div class="form-row form-group">
+		  <div class="col-3">
+		    <div class="d-block">
+		      <label>Holiday</label>
 		    </div>
-		    <div class="col">
+		    <div class="custom-control custom-switch">
+		      <input type="checkbox" class="custom-control-input" id="edit-holiday">
+		      <label class="custom-control-label" for="edit-holiday"><span id="holiday-status">No</span></label>
 		    </div>
-		    <div class="col">
-		      <button id="settings-save" class="btn btn-primary float-right">Save</button>
+		  </div>
+		  <div class="col">
+		    <label>Activities</label>
+		    <input type="text" id="edit-activities" class="form-control form-control-sm" value=""/>
+		  </div>
+		</div>
+		<div class="form-row form-group">
+		  <div class="col">
+		    <label>Vacation</label>
+		    <select id="edit-vacation" class="custom-select custom-select-sm edit-select non-holiday">
+		    </select>
+		  </div>
+		  <div class="col">
+		    <label>Sick Leave</label>
+		    <select id="edit-sick" class="custom-select custom-select-sm edit-select non-holiday">
+		    </select>
+		  </div>
+		</div>
+		<div class="form-row form-group">
+		  <div class="col">
+		    <label>Hours Worked</label>
+		    <a href="#" id="add" class="mt-n1 btn btn-circle btn-hours non-holiday">+</a>
+		    <a href="#" id="remove" class="mt-n1 btn btn-circle btn-hours btn-hours-disabled non-holiday">-</a>
+		    <div id="edit-hours-worked">
 		    </div>
+		  </div>
+		</div>
+	      </div>
+	    </div>
+	  </div>
+	  <div class="col-md-6 px-2">
+	    <div class="row">
+	      <div class="col">
+		<div id="notes" class="card shadow">
+		  <h4 class="blue card-header">Notes</h4>
+		  <div class="card-body">
+		    Notes go here
+		  </div>
+		</div>
+	      </div>
+	    </div>
+	    <div class="row">
+	      <div class="col">
+		<div id="summary" class="card shadow">
+		  <h4 class="blue card-header">Summary</h4>
+		  <div class="card-body">
+		    Summary goes here
 		  </div>
 		</div>
 	      </div>
