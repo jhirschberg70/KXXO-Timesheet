@@ -311,6 +311,9 @@ function addTimes() {
   html += '</div></div></div>'
   
   $('#edit-hours-worked').append(html);
+
+  // Enable removal of times
+  $('#remove').prop('disabled', false).removeClass('btn-hours-disabled');
   
   $('#' + arrive).datetimepicker({
     format: 'HHmm',
@@ -351,6 +354,11 @@ function removeTimes() {
   $('.leave:last').datetimepicker('destroy');
   $('.times:last').remove();
   saveCheck();
+
+  // If there are no more times left, disable the remove button
+  if (!($('.arrive').length)) {
+    $('#remove').prop('disabled', true).addClass('btn-hours-disabled');
+  }
 }
 
 function print() {
