@@ -123,6 +123,10 @@ div#content-wrapper {
   overflow-x:hidden;
 }
 
+div#holiday-status {
+  width:1.6rem;
+}
+
 div#wrapper {
   display:flex;
   height:100%;
