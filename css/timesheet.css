@@ -45,12 +45,14 @@ label {
 
 .btn-circle {
   border-radius:100%;
-  padding:0;
+  color:rgb(33,37,41);
+  display:inline-flex;
   width:1.5rem;
   height:1.5rem;
-  display:inline-flex;
   align-items:center;
   justify-content:center;
+  cursor:pointer;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
 .btn-circle:hover {
