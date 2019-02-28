@@ -92,8 +92,8 @@ label {
 .sidebar {
   color:#fff;
   position:fixed;
-  width:150px;
-  height:100vh;
+  min-height:100vh;
+  width:10rem;
 }
 
 .shadow {
@@ -114,22 +114,23 @@ label.custom-control-label::before, label.custom-control-label::after{
   left: auto;
 }
 
+div#content-wrapper {
+  position:relative;
+  left:10rem;
+  width:calc(100vw - 10rem);
+  overflow-x:hidden;
+}
+
 div#wrapper {
-  position:absolute;
-  left:150px;
-  width:calc(100vw - 150px);
-  height:100vh;
+  display:flex;
+  height:100%;
   background:rgb(245,245,245);
 }
 
-div#main {
-  position:relative;
+@media (max-width:767px) {
+  .link-text {display:none;}
+  .navbar-nav .nav-link {text-align:center;padding-left:0;}
+  .sidebar {width:3rem;}
+  div#content-wrapper {width: calc(100vw - 3rem); left:3rem;}
 }
 
-@media (max-width:767px) {
-  div#wrapper {left:44px;width:calc(100vw - 44px);}
-  div#dueDate {font-size:18px;}
-  .sidebar {width:44px;}
-  .navbar-nav .nav-link {text-align:center;padding-left:0;}
-  .link-text {display:none;}
-  }
