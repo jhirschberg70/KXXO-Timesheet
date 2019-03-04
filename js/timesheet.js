@@ -294,22 +294,30 @@ function save() {
 
 function addTimes() {
   let numTimes = $('.times').length;
-  let arriveLabel = (numTimes ? 'Return' : 'Arrive');
   let arrive = 'a' + numTimes;
   let leave = 'l' + numTimes;
+  let hoursType = 'ht' + numTimes;
+  let hoursTypeStatus = 'hts' + numTimes;
 
-  let html = '<div class=\"form-row times\">';
-  html += '<div class=\"col\">';
-  html += '<label>' + arriveLabel + '</label>';
+  let html = '<div class=\"form-row form-group\">';
+  html += '<div class=\"col-3\">';
+  html += '<div class=\"custom-control custom-switch\">';
+  html += '<input type=\"checkbox\" id=\"' + hoursType + '\" class=\"custom-control-input\">';
+  html += '<label class=\"custom-control-label hours-type-label\" for=\"' + hoursType + '\">';
+  html += '<div id=\"' + hoursTypeStatus + '\" class=\"hours-type-status\">Regular</div>';
+  html += '</label>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class=\"col-3\">';
   html += '<div class=\"form-group\">';
   html += '<div id=\"' + arrive + '\" class=\"arrive\"></div>';
   html += '</div></div>';
-  html += '<div class=\"col\">';
-  html += '<label>Leave</label>';
+  html += '<div class=\"col-3\">';
   html += '<div class=\"form-group\">';
   html += '<div id=\"' + leave + '\" class=\"leave\"></div>';
-  html += '</div></div></div>'
-  
+  html += '</div></div></div>';
+
+  console.log(html);
   $('#edit-hours-worked').append(html);
 
   // Enable removal of times
@@ -636,6 +644,9 @@ function toggleHoliday() {
   }
 }
 
+function toggleHoursType () {
+}
+
 function saveSettings() {
   name = $('#settings-name').val();
   hoursPerDay = $('#settings-hours-per-day').val();
@@ -653,4 +664,3 @@ $(function() {
   init();
   view($('#set-date').datetimepicker('date'));
 });
-
