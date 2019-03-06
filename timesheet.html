@@ -49,8 +49,8 @@
 		    </div>
 		  </div>
 		  <hr>
-		  <div class="form-row form-group">
-		    <div class="col-auto">
+		  <div class="form-row">
+		    <div class="col-auto form-group">
 		      <div class="d-block">
 			<label>Holiday</label>
 		      </div>
@@ -59,29 +59,45 @@
 			<label class="custom-control-label holiday-label" for="edit-holiday"><div id="holiday-status">No</div></label>
 		      </div>
 		    </div>
-		    <div class="col">
+		    <div class="col form-group">
 		      <label>Activities</label>
 		      <input type="text" id="edit-activities" class="form-control form-control-sm" value=""/>
 		    </div>
 		  </div>
-		  <div class="form-row form-group">
-		    <div class="col">
+		  <div class="form-row">
+		    <div class="col form-group">
 		      <label>Vacation</label>
 		      <select id="edit-vacation" class="custom-select custom-select-sm edit-select non-holiday">
 		      </select>
 		    </div>
-		    <div class="col">
+		    <div class="col form-group">
 		      <label>Sick Leave</label>
 		      <select id="edit-sick" class="custom-select custom-select-sm edit-select non-holiday">
 		      </select>
 		    </div>
 		  </div>
-		  <div class="form-row form-group">
-		    <div class="col">
+		  <div class="form-row">
+		    <div class="col form-group">
 		      <label>Hours Worked</label>
 		      <div id="add" class="btn-circle btn-hours non-holiday" role="button">+</div>
 		      <div id="remove" class="btn-circle btn-hours btn-hours-disabled non-holiday" role="button">-</div>
 		      <div id="edit-hours-worked">
+			<div class="form-row times">
+			  <div class="col-auto form-group">
+			    <div class="custom-control custom-switch">
+			      <input type="checkbox" class="custom-control-input" id="hours-type1">
+			      <label class="custom-control-label hours-type-label" for="hours-type1"><div id="hours-type-status1" class="hours-type-status">No</div></label>
+			    </div>
+			  </div>
+			  <div class="col-3 form-group">
+			    <div id="a0" class="arrive">
+			    </div>
+			  </div>
+			  <div class="col-3 form-group">
+			    <div id="l0" class="leave">
+			    </div>
+			  </div>
+			</div>
 		      </div>
 		    </div>
 		  </div>
