@@ -54,7 +54,7 @@
 		      <div class="d-block">
 			<label>Holiday</label>
 		      </div>
-		      <div class="custom-control custom-switch">
+		      <div class="custom-control custom-switch toggle">
 			<input type="checkbox" class="custom-control-input" id="edit-holiday">
 			<label class="custom-control-label holiday-label" for="edit-holiday"><div id="holiday-status">No</div></label>
 		      </div>
@@ -84,17 +84,21 @@
 		      <div id="edit-hours-worked">
 			<div class="form-row times">
 			  <div class="col-auto form-group">
-			    <div class="custom-control custom-switch">
-			      <input type="checkbox" class="custom-control-input" id="hours-type1">
-			      <label class="custom-control-label hours-type-label" for="hours-type1"><div id="hours-type-status1" class="hours-type-status">No</div></label>
+			    <div class="custom-control custom-switch toggle">
+			      <input type="checkbox" class="custom-control-input non-holiday" id="hours-type-0">
+			      <label class="custom-control-label hours-type-label" for="hours-type-0"><div id="hours-type-status-0" class="hours-type-status">No</div></label>
 			    </div>
 			  </div>
 			  <div class="col-3 form-group">
-			    <div id="a0" class="arrive">
+			    <div id="a-0" class="arrive">
+			      <select class="custom-select custom-select-sm non-holiday">
+			      </select>
 			    </div>
 			  </div>
 			  <div class="col-3 form-group">
-			    <div id="l0" class="leave">
+			    <div id="l-0" class="leave">
+			      <select class="custom-select custom-select-sm non-holiday">
+			      </select>
 			    </div>
 			  </div>
 			</div>

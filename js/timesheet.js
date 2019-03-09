@@ -77,25 +77,25 @@ function saveCheck() {
   // Check that all times are valid.  First check that all arrive times are
   // < leave times.  Then check that return time is > previous leave time.
   for (let time = 0; time < numTimes; time++) {
-    let arrive = Number($('#a' + time).datetimepicker('date').format('HHmm'));
-    let leave  = Number($('#l' + time).datetimepicker('date').format('HHmm'));
+    let arrive = Number($('#a-' + time).datetimepicker('date').format('HHmm'));
+    let leave  = Number($('#l-' + time).datetimepicker('date').format('HHmm'));
     let prevLeave = -1;
 
     if (time > 0) {
-      prevLeave = Number($('#l' + (time - 1)).datetimepicker('date').format('HHmm'));
+      prevLeave = Number($('#l-' + (time - 1)).datetimepicker('date').format('HHmm'));
     }
 
-    $('#a' + time).addClass('valid');
-    $('#l' + time).addClass('valid');
+    $('#a-' + time).addClass('valid');
+    $('#l-' + time).addClass('valid');
     
     if (leave <= arrive) {
-      $('#a' + time).removeClass('valid');
-      $('#l' + time).removeClass('valid');
+      $('#a-' + time).removeClass('valid');
+      $('#l-' + time).removeClass('valid');
     }
 
     if (arrive <= prevLeave) {
-      $('#a' + time).removeClass('valid');
-      $('#l' + (time - 1)).removeClass('valid');
+      $('#a-' + time).removeClass('valid');
+      $('#l-' + (time - 1)).removeClass('valid');
     }
 
     allTimesValid = (allTimesValid && (leave > arrive) && (arrive > prevLeave));
@@ -188,8 +188,8 @@ function edit() {
       times.forEach(function (entry, index) {
 	let [arrive, leave] = entry.split('-');
 	addTimes();
-	$('#a' + index).datetimepicker('date', arrive);
-	$('#l' + index).datetimepicker('date', leave);
+	$('#a-' + index).datetimepicker('date', arrive);
+	$('#l-' + index).datetimepicker('date', leave);
       });
     }
     $('#edit-holiday').val(record.holiday/hourStep);
@@ -256,8 +256,8 @@ function save() {
   let times = '';
 
   $('.times').each(function(index) {
-    let arrive = $('#a' + index).datetimepicker('date');
-    let leave = $('#l' + index).datetimepicker('date');
+    let arrive = $('#a-' + index).datetimepicker('date');
+    let leave = $('#l-' + index).datetimepicker('date');
     if (times) { times += ', ';}
     times += arrive.format('HHmm') + '-' + leave.format('HHmm');
     regular += leave.diff(arrive, 'hours', true);
@@ -294,63 +294,60 @@ function save() {
 
 function addTimes() {
   let numTimes = $('.times').length;
-  let arrive = 'a' + numTimes;
-  let leave = 'l' + numTimes;
-  let hoursType = 'ht' + numTimes;
-  let hoursTypeStatus = 'hts' + numTimes;
+  let aSelector = '#a-' + numTimes;
+  let lSelector = '#l-' + numTimes;
 
-  let html = '<div class=\"form-row form-group\">';
-  html += '<div class=\"col-3\">';
+  let html = '<div class=\"form-row times\">';
+  html += '<div class=\"col-auto form-group\">';
   html += '<div class=\"custom-control custom-switch\">';
-  html += '<input type=\"checkbox\" id=\"' + hoursType + '\" class=\"custom-control-input\">';
-  html += '<label class=\"custom-control-label hours-type-label\" for=\"' + hoursType + '\">';
-  html += '<div id=\"' + hoursTypeStatus + '\" class=\"hours-type-status\">Regular</div>';
-  html += '</label>';
+  html += '<input type=\"checkbox\" class=\"custom-control-input\" id=\"hours-type-' + numTimes + '\">';
+  html += '<label class=\"custom-control-label hours-type-label\" for=\"hours-type-' + numTimes + '\"><div id=\"hours-type-status-' + numTimes + '\" class=\"hours-type-status\">No</div></label>';
   html += '</div>';
   html += '</div>';
-  html += '<div class=\"col-3\">';
-  html += '<div class=\"form-group\">';
-  html += '<div id=\"' + arrive + '\" class=\"arrive\"></div>';
-  html += '</div></div>';
-  html += '<div class=\"col-3\">';
-  html += '<div class=\"form-group\">';
-  html += '<div id=\"' + leave + '\" class=\"leave\"></div>';
-  html += '</div></div></div>';
-
+  html += '<div class=\"col-3 form-group\">';
+  html += '<div id=\"a-' + numTimes + '\" class=\"arrive\">';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class=\"col-3 form-group\">';
+  html += '<div id=\"l-' + numTimes + '\" class=\"leave\">';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  
   console.log(html);
   $('#edit-hours-worked').append(html);
 
   // Enable removal of times
   $('#remove').prop('disabled', false).removeClass('btn-hours-disabled');
   
-  $('#' + arrive).datetimepicker({
+  $(aSelector).datetimepicker({
     format: 'HHmm',
     inline: true,
     stepping: timeStep
   });
 
-  $('#' + leave).datetimepicker({
+  $(lSelector).datetimepicker({
     format: 'HHmm',
     inline: true,
     stepping: timeStep
   });
 
-  $('#' + arrive).datetimepicker('date', '00:00');
-  $('#' + leave).datetimepicker('date', '00:00');
+  $(aSelector).datetimepicker('date', '00:00');
+  $(lSelector).datetimepicker('date', '00:00');
 
-  $('#' + arrive).on('change.datetimepicker', function() {
+  $(aSelector).on('change.datetimepicker', function() {
     saveCheck();
   });
 
-  $('#' + leave).on('change.datetimepicker', function() {
+  $(lSelector).on('change.datetimepicker', function() {
     saveCheck();
   });
 
   // Disable up and down arrows for hour and minutes
-  $('#' + arrive + ' .timepicker .timepicker-picker .table-condensed tr:first').css('display', 'none');
-  $('#' + arrive + ' .timepicker .timepicker-picker .table-condensed tr:last').css('display', 'none');
-  $('#' + leave + ' .timepicker .timepicker-picker .table-condensed tr:first').css('display', 'none');
-  $('#' + leave + ' .timepicker .timepicker-picker .table-condensed tr:last').css('display', 'none');
+  $(aSelector + ' .timepicker .timepicker-picker .table-condensed tr:first').css('display', 'none');
+  $(aSelector + ' .timepicker .timepicker-picker .table-condensed tr:last').css('display', 'none');
+  $(lSelector + ' .timepicker .timepicker-picker .table-condensed tr:first').css('display', 'none');
+  $(lSelector + ' .timepicker .timepicker-picker .table-condensed tr:last').css('display', 'none');
 
   // Call saveCheck because new times will default to being invalid, and submission
   // needs to account for these newly added times
