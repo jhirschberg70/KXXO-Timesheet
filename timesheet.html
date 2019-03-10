@@ -38,7 +38,7 @@
 	  <div id="header" class="mb-3">
 	  </div>
 	  <div class="row mx-n1">
-	    <div class="col-md-6 px-2">
+	    <div class="col-md-8 px-2">
 	      <div id="daily-activities" class="card shadow">
 		<h4 class="blue card-header">Daily Activities</h4>
 		<div class="card-body">
@@ -84,21 +84,38 @@
 		      <div id="edit-hours-worked">
 			<div class="form-row times">
 			  <div class="col-auto form-group">
+			    <div class="d-block">
+			      <label>Type</label>
+			    </div>
 			    <div class="custom-control custom-switch toggle">
 			      <input type="checkbox" class="custom-control-input non-holiday" id="hours-type-0">
 			      <label class="custom-control-label hours-type-label" for="hours-type-0"><div id="hours-type-status-0" class="hours-type-status">No</div></label>
 			    </div>
 			  </div>
-			  <div class="col-3 form-group">
+			  <div class="col form-group">
 			    <div id="a-0" class="arrive">
+			      <label>Arrive</label>
 			      <select class="custom-select custom-select-sm non-holiday">
 			      </select>
 			    </div>
 			  </div>
-			  <div class="col-3 form-group">
+			  <div class="col form-group">
+			    <label>Leave</label>
 			    <div id="l-0" class="leave">
 			      <select class="custom-select custom-select-sm non-holiday">
 			      </select>
+			    </div>
+			  </div>
+			  <div class="col-4 form-group">
+			    <label>Rate</label>
+			    <div id="r-0" class="talent-rate input-group input-group-sm">
+			      <div class="input-group-prepend">
+				<span class="input-group-text">$</span>
+			      </div>
+			      <input type="text" class="form-control non-holiday">
+			      <div class="input-group-append">
+				<span class="input-group-text">/hr</span>
+			      </div>
 			    </div>
 			  </div>
 			</div>
@@ -108,7 +125,7 @@
 		</div>
 	      </div>
 	    </div>
-	    <div class="col-md-6 px-2">
+	    <div class="col-md-4 px-2">
 	      <div class="row">
 		<div class="col">
 		  <div id="notes" class="card shadow">

@@ -79,17 +79,18 @@ body {
 
 .holiday-label {
   position:relative;
-  padding-right:2.3rem;
+  padding-right:1.25rem;
   font-size:.8rem;
 }
 
 .hours-type-label {
   position:relative;
-  padding-right:2rem;
+  padding-right:1.25rem;
   font-size:.8rem;
 }
 
 .hours-type-status {
+  width:1.25rem;
   padding-top:.2rem;
 }
 
@@ -130,7 +131,7 @@ div#content-wrapper {
 }
 
 div#holiday-status {
-  width:1.6rem;
+  width:1.25rem;
   padding-top:.2rem;
 }
 
