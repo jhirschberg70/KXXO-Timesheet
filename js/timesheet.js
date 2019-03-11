@@ -77,12 +77,12 @@ function saveCheck() {
   // Check that all times are valid.  First check that all arrive times are
   // < leave times.  Then check that return time is > previous leave time.
   for (let time = 0; time < numTimes; time++) {
-    let arrive = Number($('#a-' + time).datetimepicker('date').format('HHmm'));
-    let leave  = Number($('#l-' + time).datetimepicker('date').format('HHmm'));
-    let prevLeave = -1;
+    let arrive = currentDate + ' ' + ($('#a-' + time).datetimepicker('date').format('LT'));
+    let leave  = currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('LT'));
+    let prevLeave = '1900-01-01 12:00 AM';
 
     if (time > 0) {
-      prevLeave = Number($('#l-' + (time - 1)).datetimepicker('date').format('HHmm'));
+      prevLeave = currentDate + ' ' + ($('#l-' + (time - 1)).datetimepicker('date').format('LT'));
     }
 
     $('#a-' + time).addClass('valid');
@@ -259,7 +259,7 @@ function save() {
     let arrive = $('#a-' + index).datetimepicker('date');
     let leave = $('#l-' + index).datetimepicker('date');
     if (times) { times += ', ';}
-    times += arrive.format('HHmm') + '-' + leave.format('HHmm');
+    times += arrive.format('LT') + '-' + leave.format('LT');
     regular += leave.diff(arrive, 'hours', true);
   });
   
@@ -294,70 +294,97 @@ function save() {
 
 function addTimes() {
   let numTimes = $('.times').length;
-  let aSelector = '#a-' + numTimes;
-  let lSelector = '#l-' + numTimes;
+  let arriveID = 'a-' + numTimes;
+  let leaveID = 'l-' + numTimes;
+  let rateID = 'r-' + numTimes;
+  let hoursType = 'hours-type-' + numTimes;
+  let arriveSelector = '#' + arriveID
+  let leaveSelector = '#' + leaveID;
 
-  let html = '<div class=\"form-row times\">';
-  html += '<div class=\"col-auto form-group\">';
-  html += '<div class=\"custom-control custom-switch\">';
-  html += '<input type=\"checkbox\" class=\"custom-control-input\" id=\"hours-type-' + numTimes + '\">';
-  html += '<label class=\"custom-control-label hours-type-label\" for=\"hours-type-' + numTimes + '\"><div id=\"hours-type-status-' + numTimes + '\" class=\"hours-type-status\">No</div></label>';
+  let html = '<div class="form-row times">';
+  html += '<div class="col-auto">';
+  html += '<div class="form-group">';
+  html += '<div class="d-block">';
+  html += '<label>Type</label>';
   html += '</div>';
-  html += '</div>';
-  html += '<div class=\"col-3 form-group\">';
-  html += '<div id=\"a-' + numTimes + '\" class=\"arrive\">';
-  html += '</div>';
-  html += '</div>';
-  html += '<div class=\"col-3 form-group\">';
-  html += '<div id=\"l-' + numTimes + '\" class=\"leave\">';
+  html += '<div class="custom-control custom-switch toggle">';
+  html += '<input type=\"checkbox\" class=\"custom-control-input non-holiday\" id=\"' + hoursType + '\">';
+  html += '<label class="custom-control-label hours-type-label" for="' + hoursType + '"><div class=\"hours-type-status\">No</div></label>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
-  
-  console.log(html);
+  html += '<div class="col">';
+  html += '<div class="form-group">';
+  html += '<label>Arrive</label>';
+  html += '<div class="input-group date" id="' + arriveID + '" data-target-input="nearest">';
+  html += '<input type="text" class="form-control form-control-sm datetimepicker-input arrive" data-target="' + arriveSelector + '" data-toggle="datetimepicker"/>';
+  html += '<div class="input-group-append" data-target="' + arriveSelector + '" data-toggle="datetimepicker">';
+  html += '<div class="input-group-text"><i class="fa fa-clock-o"></i></div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col">';
+  html += '<div class="form-group">';
+  html += '<label>Leave</label>';
+  html += '<div class="input-group date" id="' + leaveID + '" data-target-input="nearest">';
+  html += '<input type="text" class="form-control form-control-sm datetimepicker-input leave" data-target="' + leaveSelector + '" data-toggle="datetimepicker"/>';
+  html += '<div class="input-group-append" data-target="' + leaveSelector + '" data-toggle="datetimepicker">';
+  html += '<div class="input-group-text"><i class="fa fa-clock-o"></i></div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="col">';
+  html += '<div class="form-group">';
+  html += '<label>Rate</label>';
+  html += '<div class="input-group input-group-sm" id="' + rateID + '">';
+  html += '<div class="input-group-prepend">';
+  html += '<div class="input-group-text">$</div>';
+  html += '</div>';
+  html += '<input type="text" class="form-control datetimepicker-input">';
+  html += '<div class="input-group-append">';
+  html += '<div class="input-group-text">/hr</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+
   $('#edit-hours-worked').append(html);
 
   // Enable removal of times
   $('#remove').prop('disabled', false).removeClass('btn-hours-disabled');
   
-  $(aSelector).datetimepicker({
-    format: 'HHmm',
-    inline: true,
-    stepping: timeStep
+  $(arriveSelector).datetimepicker({
+    format: 'LT',
   });
 
-  $(lSelector).datetimepicker({
-    format: 'HHmm',
-    inline: true,
-    stepping: timeStep
+  $(leaveSelector).datetimepicker({
+    format: 'LT',
   });
 
-  $(aSelector).datetimepicker('date', '00:00');
-  $(lSelector).datetimepicker('date', '00:00');
+  $(arriveSelector).datetimepicker('date', '00:00');
+  $(leaveSelector).datetimepicker('date', '00:00');
 
-  $(aSelector).on('change.datetimepicker', function() {
+  $(arriveSelector).on('change.datetimepicker', function() {
     saveCheck();
   });
 
-  $(lSelector).on('change.datetimepicker', function() {
+  $(leaveSelector).on('change.datetimepicker', function() {
     saveCheck();
   });
-
-  // Disable up and down arrows for hour and minutes
-  $(aSelector + ' .timepicker .timepicker-picker .table-condensed tr:first').css('display', 'none');
-  $(aSelector + ' .timepicker .timepicker-picker .table-condensed tr:last').css('display', 'none');
-  $(lSelector + ' .timepicker .timepicker-picker .table-condensed tr:first').css('display', 'none');
-  $(lSelector + ' .timepicker .timepicker-picker .table-condensed tr:last').css('display', 'none');
 
   // Call saveCheck because new times will default to being invalid, and submission
   // needs to account for these newly added times
   saveCheck();
 }
 
-function removeTimes() {
-  $('.arrive:last').datetimepicker('destroy');
-  $('.leave:last').datetimepicker('destroy');
-  $('.times:last').remove();
+function removeTimes(event, instance = ':last') {
+  $('.arrive' + instance).datetimepicker('destroy');
+  $('.leave' + instance).datetimepicker('destroy');
+  $('.times' + instance).remove();
   saveCheck();
 
   // If there are no more times left, disable the remove button
@@ -610,7 +637,6 @@ function updateView(record) {
   if (record) {
     $('#edit-activities').html(record.activities);
     $('#edit-holiday').html(record.holiday);
-    $('#edit-talent').html(record.talent);
     $('#edit-vacation').html(record.vacation);
     $('#edit-sick').html(record.sick);
     $('#edit-regular').html(record.times ? record.times + ', ' + record.regular : '');
@@ -618,12 +644,10 @@ function updateView(record) {
   }
   else {
     // Clear everything out
-    $('#edit-activities').html('-');
+    $('#edit-activities').html('');
     $('#edit-holiday').html('-');
-    $('#edit-talent').html('-');
     $('custom-select').val(0);
-    $('#edit-regular').html('-');
-    $('#delete').addClass('hide');
+    removeTimes(null, '');
   }
 }
 

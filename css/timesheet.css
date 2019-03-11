@@ -8,8 +8,7 @@ body {
 }
 
 .arrive, .leave {
-//  border:3px solid red;
-//  border-radius:4px;
+  border-color:red;
 }
 
 .bg-gradient-primary {
@@ -19,10 +18,9 @@ body {
   background-size: cover;
 }
 
-.bootstrap-datetimepicker-widget table td,
+.bootstrap-datetimepicker-widget table td
 .bootstrap-datetimepicker-widget table td span {
-  height:calc(1.5em + .5rem + 2px);
-  line-height:1.5;
+  box-sizing:border-box;
   padding-top:0;
   padding-bottom:0;
   margin-top:0;
@@ -36,7 +34,8 @@ body {
 }
 
 .border-gray {
-  border:1px solid rgb(206,212,218);border-radius:4px;
+  border:1px solid rgb(206,212,218);
+  border-radius:4px;
 }
 
 .btn-circle {
@@ -79,18 +78,18 @@ body {
 
 .holiday-label {
   position:relative;
-  padding-right:1.25rem;
+  padding-right:1.23rem;
   font-size:.8rem;
 }
 
 .hours-type-label {
   position:relative;
-  padding-right:1.25rem;
+  padding-right:1.23rem;
   font-size:.8rem;
 }
 
 .hours-type-status {
-  width:1.25rem;
+  width:1.23rem;
   padding-top:.2rem;
 }
 
@@ -120,7 +119,7 @@ body {
 }
 
 .valid {
-  border:1px solid rgb(206,212,218);
+  border-color:rgb(206,212,218);
 }
 
 div#content-wrapper {
@@ -131,7 +130,7 @@ div#content-wrapper {
 }
 
 div#holiday-status {
-  width:1.25rem;
+  width:1.23rem;
   padding-top:.2rem;
 }
 
