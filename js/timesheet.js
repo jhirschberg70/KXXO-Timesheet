@@ -66,7 +66,8 @@ function Undo(type, record) {
 
 function saveCheck() {
   let specialHoursSelected = false;
-  
+
+  // Need to account for Holiday
   $('.custom-select').each(function() {
     specialHoursSelected = (specialHoursSelected || ($(this).val() !== '0'));
   });
@@ -77,32 +78,35 @@ function saveCheck() {
   // Check that all times are valid.  First check that all arrive times are
   // < leave times.  Then check that return time is > previous leave time.
   for (let time = 0; time < numTimes; time++) {
-    let arrive = currentDate + ' ' + ($('#a-' + time).datetimepicker('date').format('LT'));
-    let leave  = currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('LT'));
-    let prevLeave = '1900-01-01 12:00 AM';
+    let arrive = moment(currentDate + ' ' + ($('#a-' + time).datetimepicker('date').format('HH:mm')));
+    let leave  = moment(currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('HH:mm')));
+    let prevLeave = moment('1970-01-01 00:00'); // Beginning of time
 
     if (time > 0) {
-      prevLeave = currentDate + ' ' + ($('#l-' + (time - 1)).datetimepicker('date').format('LT'));
+      prevLeave = moment(currentDate + ' ' + ($('#l-' + (time - 1)).datetimepicker('date').format('HH:mm')));
     }
 
-    $('#a-' + time).addClass('valid');
-    $('#l-' + time).addClass('valid');
+    $('#a-' + time).parents('.time').addClass('valid').removeClass('invalid');
+    $('#l-' + time).parents('.time').addClass('valid').removeClass('invalid');
+
+    console.log($('#a-' + time).parents('.time'));
     
-    if (leave <= arrive) {
-      $('#a-' + time).removeClass('valid');
-      $('#l-' + time).removeClass('valid');
+    if (leave.isSameOrBefore(arrive)) {
+      $('#a-' + time).parents('.time').removeClass('valid').addClass('invalid');
+      $('#l-' + time).parents('.time').removeClass('valid').addClass('invalid');
+      allTimesValid = false;
     }
 
-    if (arrive <= prevLeave) {
-      $('#a-' + time).removeClass('valid');
-      $('#l-' + (time - 1)).removeClass('valid');
+    if (arrive.isSameOrBefore(prevLeave)) {
+      $('#a-' + time).parents('.time').removeClass('valid').addClass('invalid');
+      $('#l-' + (time - 1)).parents('.time').removeClass('valid').addClass('invalid');
+      allTimesValid = false;
     }
-
-    allTimesValid = (allTimesValid && (leave > arrive) && (arrive > prevLeave));
   }
-  
+
+  // If special hours are selected or all regular/talent times are valid, it's okay to save
   if ((specialHoursSelected && (!numTimes)) ||
-      (numTimes && allTimesValid)) {
+      (allTimesValid)) {
     $('#edit-save').prop('disabled', false);
   }
   else {
@@ -143,7 +147,7 @@ function initHandlers() {
   $('#add').click(addTimes);
   $('#remove').click(removeTimes);
   $('#delete').click(deleteRecord);
-  $('#edit').click(edit);
+//  $('#edit').click(edit);
   $('#edit-save').click(save);
   $('#print').click(print);
   $('#undo').click(undo);
@@ -165,49 +169,48 @@ function undo() {
 }
 
 
-function edit() {
-  // First clear everything out
-  $('.arrive').datetimepicker('destroy');
-  $('.leave').datetimepicker('destroy');
-  $('.times').remove();
-  $('.custom-select').val(0);
-  $('#activity').val('');
-
-  // Initialize undoData as if entry has never been saved
-  undoData = new Undo('edit', null);
-  
-  // Check to see if an entry already exists for the current selected date
-  let record = JSON.parse(localStorage.getItem(currentDate));
-  
-  if (record) {
-    undoData.record = record;
-    
-    if (record.times) {
-      let times = record.times.split(',');
-      
-      times.forEach(function (entry, index) {
-	let [arrive, leave] = entry.split('-');
-	addTimes();
-	$('#a-' + index).datetimepicker('date', arrive);
-	$('#l-' + index).datetimepicker('date', leave);
-      });
-    }
-    $('#edit-holiday').val(record.holiday/hourStep);
-    $('#edit-talent').val(record.talent/hourStep);
-    $('#edit-vacation').val(record.vacation/hourStep);
-    $('#edit-sick').val(record.sick/hourStep);
-    $('#edit-activities').val(record.activities);
-  }
-
-  // Activate modal
-  $('#edit-modal').modal();
-  $('input[type="date"]').height($('input').height());
-
-  // Check if it's okay to save.  This should always be true when
-  // editing a previously saved record.
-  saveCheck();
-}
-
+/* function edit() {
+ *   // First clear everything out
+ *   $('.time').datetimepicker('destroy');
+ *   $('.times').remove();
+ *   $('.custom-select').val(0);
+ *   $('#activity').val('');
+ * 
+ *   // Initialize undoData as if entry has never been saved
+ *   undoData = new Undo('edit', null);
+ *   
+ *   // Check to see if an entry already exists for the current selected date
+ *   let record = JSON.parse(localStorage.getItem(currentDate));
+ *   
+ *   if (record) {
+ *     undoData.record = record;
+ *     
+ *     if (record.times) {
+ *       let times = record.times.split(',');
+ *       
+ *       times.forEach(function (entry, index) {
+ * 	let [arrive, leave] = entry.split('-');
+ * 	addTimes();
+ * 	$('#a-' + index).datetimepicker('date', arrive);
+ * 	$('#l-' + index).datetimepicker('date', leave);
+ *       });
+ *     }
+ *     $('#edit-holiday').val(record.holiday/hourStep);
+ *     $('#edit-talent').val(record.talent/hourStep);
+ *     $('#edit-vacation').val(record.vacation/hourStep);
+ *     $('#edit-sick').val(record.sick/hourStep);
+ *     $('#edit-activities').val(record.activities);
+ *   }
+ * 
+ *   // Activate modal
+ *   $('#edit-modal').modal();
+ *   $('input[type="date"]').height($('input').height());
+ * 
+ *   // Check if it's okay to save.  This should always be true when
+ *   // editing a previously saved record.
+ *   saveCheck();
+ * }
+ * */
 function view(date) {
   // Set current date
   currentDate = $('#set-date').datetimepicker('date').format('YYYY-MM-DD');
@@ -264,9 +267,7 @@ function save() {
   });
   
   // Remove datetimepickers for regular hours
-  $('.arrive').datetimepicker('destroy');
-  $('.leave').datetimepicker('destroy');
-  $('.times').remove();
+  // removeTimes();
 
   let record = new Record(($('#edit-holiday').val() * hourStep),
 			  ($('#edit-talent').val() * hourStep),
@@ -301,50 +302,50 @@ function addTimes() {
   let arriveSelector = '#' + arriveID
   let leaveSelector = '#' + leaveID;
 
-  let html = '<div class="form-row times">';
-  html += '<div class="col-auto">';
-  html += '<div class="form-group">';
-  html += '<div class="d-block">';
+  let html = '<div class=\"form-row times\">';
+  html += '<div class=\"col-auto\">';
+  html += '<div class=\"form-group\">';
+  html += '<div class=\"d-block\">';
   html += '<label>Type</label>';
   html += '</div>';
-  html += '<div class="custom-control custom-switch toggle">';
+  html += '<div class=\"custom-control custom-switch toggle\">';
   html += '<input type=\"checkbox\" class=\"custom-control-input non-holiday\" id=\"' + hoursType + '\">';
-  html += '<label class="custom-control-label hours-type-label" for="' + hoursType + '"><div class=\"hours-type-status\">No</div></label>';
+  html += '<label class=\"custom-control-label hours-type-label\" for=\"' + hoursType + '\"><div class=\"hours-type-status\">No</div></label>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
-  html += '<div class="col">';
-  html += '<div class="form-group">';
-  html += '<label>Arrive</label>';
-  html += '<div class="input-group date" id="' + arriveID + '" data-target-input="nearest">';
-  html += '<input type="text" class="form-control form-control-sm datetimepicker-input arrive" data-target="' + arriveSelector + '" data-toggle="datetimepicker"/>';
-  html += '<div class="input-group-append" data-target="' + arriveSelector + '" data-toggle="datetimepicker">';
-  html += '<div class="input-group-text"><i class="fa fa-clock-o"></i></div>';
-  html += '</div>';
-  html += '</div>';
-  html += '</div>';
-  html += '</div>';
-  html += '<div class="col">';
-  html += '<div class="form-group">';
-  html += '<label>Leave</label>';
-  html += '<div class="input-group date" id="' + leaveID + '" data-target-input="nearest">';
-  html += '<input type="text" class="form-control form-control-sm datetimepicker-input leave" data-target="' + leaveSelector + '" data-toggle="datetimepicker"/>';
-  html += '<div class="input-group-append" data-target="' + leaveSelector + '" data-toggle="datetimepicker">';
-  html += '<div class="input-group-text"><i class="fa fa-clock-o"></i></div>';
+  html += '<div class=\"col\">';
+  html += '<div class=\"form-group time invalid\">';
+  html += '<label class="time-label">Arrive</label>';
+  html += '<div class=\"input-group date\" id=\"' + arriveID + '\" data-target-input=\"nearest\">';
+  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + arriveSelector + '\" data-toggle=\"datetimepicker\"/>';
+  html += '<div class=\"input-group-append\" data-target=\"' + arriveSelector + '\" data-toggle=\"datetimepicker\">';
+  html += '<div class=\"input-group-text\"><i class=\"fa fa-clock-o\"></i></div>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
-  html += '<div class="col">';
-  html += '<div class="form-group">';
+  html += '<div class=\"col\">';
+  html += '<div class=\"form-group time invalid\">';
+  html += '<label class="time-label">Leave</label>';
+  html += '<div class=\"input-group date\" id=\"' + leaveID + '\" data-target-input=\"nearest\">';
+  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + leaveSelector + '\" data-toggle=\"datetimepicker\"/>';
+  html += '<div class=\"input-group-append\" data-target=\"' + leaveSelector + '\" data-toggle=\"datetimepicker\">';
+  html += '<div class=\"input-group-text\"><i class=\"fa fa-clock-o\"></i></div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class=\"col\">';
+  html += '<div class=\"form-group\">';
   html += '<label>Rate</label>';
-  html += '<div class="input-group input-group-sm" id="' + rateID + '">';
-  html += '<div class="input-group-prepend">';
-  html += '<div class="input-group-text">$</div>';
+  html += '<div class=\"input-group input-group-sm\" id=\"' + rateID + '\">';
+  html += '<div class=\"input-group-prepend\">';
+  html += '<div class=\"input-group-text\">$</div>';
   html += '</div>';
-  html += '<input type="text" class="form-control datetimepicker-input">';
-  html += '<div class="input-group-append">';
-  html += '<div class="input-group-text">/hr</div>';
+  html += '<input type=\"text\" class=\"form-control datetimepicker-input\">';
+  html += '<div class=\"input-group-append\">';
+  html += '<div class=\"input-group-text\">/hr</div>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
@@ -359,10 +360,12 @@ function addTimes() {
   
   $(arriveSelector).datetimepicker({
     format: 'LT',
+    stepping: timeStep
   });
 
   $(leaveSelector).datetimepicker({
     format: 'LT',
+    stepping: timeStep
   });
 
   $(arriveSelector).datetimepicker('date', '00:00');
@@ -382,13 +385,12 @@ function addTimes() {
 }
 
 function removeTimes(event, instance = ':last') {
-  $('.arrive' + instance).datetimepicker('destroy');
-  $('.leave' + instance).datetimepicker('destroy');
+  $('.time').children('.datetimepicker-input' + instance).datetimepicker('destroy');
   $('.times' + instance).remove();
   saveCheck();
 
   // If there are no more times left, disable the remove button
-  if (!($('.arrive').length)) {
+  if (!($('.time').length)) {
     $('#remove').prop('disabled', true).addClass('btn-hours-disabled');
   }
 }
