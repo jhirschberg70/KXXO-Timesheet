@@ -9,7 +9,7 @@ let hourStep;
 
 const DEFAULT_HOURS_PER_DAY = 8.00;
 const DEFAULT_HOUR_STEP = 0.25;
-const DEFAULT_TIME_STEP = 15;
+const DEFAULT_TIME_STEP = 5;
 const STORAGE_DLM = '\u0000';
 const STATUS_TIMEOUT = 5000;
 const UNDONE_TIMEOUT = 1250;
@@ -89,8 +89,6 @@ function saveCheck() {
     $('#a-' + time).parents('.time').addClass('valid').removeClass('invalid');
     $('#l-' + time).parents('.time').addClass('valid').removeClass('invalid');
 
-    console.log($('#a-' + time).parents('.time'));
-    
     if (leave.isSameOrBefore(arrive)) {
       $('#a-' + time).parents('.time').removeClass('valid').addClass('invalid');
       $('#l-' + time).parents('.time').removeClass('valid').addClass('invalid');
@@ -297,10 +295,11 @@ function addTimes() {
   let numTimes = $('.times').length;
   let arriveID = 'a-' + numTimes;
   let leaveID = 'l-' + numTimes;
+  let hoursTypeID = 'ht-' + numTimes;
   let rateID = 'r-' + numTimes;
-  let hoursType = 'hours-type-' + numTimes;
   let arriveSelector = '#' + arriveID
   let leaveSelector = '#' + leaveID;
+  let hoursTypeSelector = '#' + hoursTypeID; 
 
   let html = '<div class=\"form-row times\">';
   html += '<div class=\"col-auto\">';
@@ -309,8 +308,8 @@ function addTimes() {
   html += '<label>Type</label>';
   html += '</div>';
   html += '<div class=\"custom-control custom-switch toggle\">';
-  html += '<input type=\"checkbox\" class=\"custom-control-input non-holiday\" id=\"' + hoursType + '\">';
-  html += '<label class=\"custom-control-label hours-type-label\" for=\"' + hoursType + '\"><div class=\"hours-type-status\">No</div></label>';
+  html += '<input type=\"checkbox\" class=\"custom-control-input non-holiday\" id=\"' + hoursTypeID + '\">';
+  html += '<label class=\"custom-control-label toggle-label\" for=\"' + hoursTypeID + '\"><div class=\"toggle-status\">Regular</div></label>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
@@ -379,8 +378,10 @@ function addTimes() {
     saveCheck();
   });
 
-  // Call saveCheck because new times will default to being invalid, and submission
-  // needs to account for these newly added times
+  $(hoursTypeSelector).change(toggleHoursType);
+
+  // Call saveCheck because new times will default to being invalid,
+  // and submission needs to account for these newly added times
   saveCheck();
 }
 
@@ -653,21 +654,30 @@ function updateView(record) {
   }
 }
 
-function toggleHoliday() {
-  if ($('#edit-holiday').is(':checked')) {
+function toggleHoursType(event) {
+  console.log($(this));
+  if ($(this).is(':checked')) {
+    $(this).siblings().children('.toggle-status').html('Talent');
+  }
+  else {
+    $(this).siblings().children('.toggle-status').html('Regular');
+  }
+}
+
+function toggleHoliday(event) {
+  console.log(event);
+  if ($(this).is(':checked')) {
     $('.non-holiday').prop('disabled', true);
     $('.btn-hours').addClass('btn-hours-disabled');
-    $('#holiday-status').html('Yes');
+    removeTimes(null, '');
+    $(this).siblings().children('.toggle-status').html('Yes');
   }
   else {
     $('.non-holiday').prop('disabled', false);
     $('#add').removeClass('btn-hours-disabled');
     $('#remove').prop('disabled', true);
-    $('#holiday-status').html('No');
+    $(this).siblings().children('.toggle-status').html('No');
   }
-}
-
-function toggleHoursType () {
 }
 
 function saveSettings() {
