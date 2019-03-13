@@ -342,7 +342,7 @@ function addTimes() {
   html += '<div class=\"input-group-prepend\">';
   html += '<div class=\"input-group-text\">$</div>';
   html += '</div>';
-  html += '<input type=\"text\" class=\"form-control datetimepicker-input\">';
+  html += '<input type=\"number\" class=\"form-control\" disabled>';
   html += '<div class=\"input-group-append\">';
   html += '<div class=\"input-group-text\">/hr</div>';
   html += '</div>';
@@ -658,9 +658,11 @@ function toggleHoursType(event) {
   console.log($(this));
   if ($(this).is(':checked')) {
     $(this).siblings().children('.toggle-status').html('Talent');
+    $(this).closest('.col-auto').siblings(':last').find('input').prop('disabled', false);
   }
   else {
     $(this).siblings().children('.toggle-status').html('Regular');
+    $(this).closest('.col-auto').siblings(':last').find('input').prop('disabled', true);
   }
 }
 
