@@ -104,11 +104,17 @@ function saveCheck() {
 
   // If special hours are selected or all regular/talent times are valid, it's okay to save
   if ((specialHoursSelected && (!numTimes)) ||
-      (allTimesValid)) {
+      (allTimesValid) ||
+      ($('#edit-holiday').is(':checked'))) {
     $('#edit-save').prop('disabled', false);
+    
+    if (!($('#edit-holiday').is(':checked'))) {
+      $('#edit-holiday').prop('disabled', true);
+    }
   }
   else {
     $('#edit-save').prop('disabled', true);
+    $('#edit-holiday').prop('disabled', false);
   }
 }
 
@@ -145,13 +151,13 @@ function initHandlers() {
   $('#add').click(addTimes);
   $('#remove').click(removeTimes);
   $('#delete').click(deleteRecord);
-//  $('#edit').click(edit);
   $('#edit-save').click(save);
   $('#print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
   $('#edit-holiday').change(toggleHoliday);
   $('#settings-save').click(saveSettings);
+  $('.custom-select').change(saveCheck);
 }
 
 function undo() {
@@ -166,49 +172,6 @@ function undo() {
   view(currentDate);
 }
 
-
-/* function edit() {
- *   // First clear everything out
- *   $('.time').datetimepicker('destroy');
- *   $('.times').remove();
- *   $('.custom-select').val(0);
- *   $('#activity').val('');
- * 
- *   // Initialize undoData as if entry has never been saved
- *   undoData = new Undo('edit', null);
- *   
- *   // Check to see if an entry already exists for the current selected date
- *   let record = JSON.parse(localStorage.getItem(currentDate));
- *   
- *   if (record) {
- *     undoData.record = record;
- *     
- *     if (record.times) {
- *       let times = record.times.split(',');
- *       
- *       times.forEach(function (entry, index) {
- * 	let [arrive, leave] = entry.split('-');
- * 	addTimes();
- * 	$('#a-' + index).datetimepicker('date', arrive);
- * 	$('#l-' + index).datetimepicker('date', leave);
- *       });
- *     }
- *     $('#edit-holiday').val(record.holiday/hourStep);
- *     $('#edit-talent').val(record.talent/hourStep);
- *     $('#edit-vacation').val(record.vacation/hourStep);
- *     $('#edit-sick').val(record.sick/hourStep);
- *     $('#edit-activities').val(record.activities);
- *   }
- * 
- *   // Activate modal
- *   $('#edit-modal').modal();
- *   $('input[type="date"]').height($('input').height());
- * 
- *   // Check if it's okay to save.  This should always be true when
- *   // editing a previously saved record.
- *   saveCheck();
- * }
- * */
 function view(date) {
   // Set current date
   currentDate = $('#set-date').datetimepicker('date').format('YYYY-MM-DD');
@@ -264,9 +227,6 @@ function save() {
     regular += leave.diff(arrive, 'hours', true);
   });
   
-  // Remove datetimepickers for regular hours
-  // removeTimes();
-
   let record = new Record(($('#edit-holiday').val() * hourStep),
 			  ($('#edit-talent').val() * hourStep),
 			  ($('#edit-vacation').val() * hourStep),
@@ -386,12 +346,12 @@ function addTimes() {
 }
 
 function removeTimes(event, instance = ':last') {
-  $('.time').children('.datetimepicker-input' + instance).datetimepicker('destroy');
+  $('.times' + instance).children('.datetimepicker-input').datetimepicker('destroy');
   $('.times' + instance).remove();
   saveCheck();
 
   // If there are no more times left, disable the remove button
-  if (!($('.time').length)) {
+  if (!($('.times').length)) {
     $('#remove').prop('disabled', true).addClass('btn-hours-disabled');
   }
 }
@@ -569,12 +529,6 @@ function initSetDate() {
   $('#set-date').on('change.datetimepicker', function() {
     view($('#set-date').datetimepicker('date'));
   });
-
-  // If any hours setting changes, check to see if submission is
-  // allowed.
-  $('.custom-select').change(function() {
-    saveCheck();
-  });
 }
 
 function initDueDate() {
@@ -655,7 +609,6 @@ function updateView(record) {
 }
 
 function toggleHoursType(event) {
-  console.log($(this));
   if ($(this).is(':checked')) {
     $(this).siblings().children('.toggle-status').html('Talent');
     $(this).closest('.col-auto').siblings(':last').find('input').prop('disabled', false);
@@ -667,7 +620,6 @@ function toggleHoursType(event) {
 }
 
 function toggleHoliday(event) {
-  console.log(event);
   if ($(this).is(':checked')) {
     $('.non-holiday').prop('disabled', true);
     $('.btn-hours').addClass('btn-hours-disabled');
@@ -679,6 +631,7 @@ function toggleHoliday(event) {
     $('#add').removeClass('btn-hours-disabled');
     $('#remove').prop('disabled', true);
     $(this).siblings().children('.toggle-status').html('No');
+    saveCheck();
   }
 }
 
