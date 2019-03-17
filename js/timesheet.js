@@ -64,14 +64,52 @@ function Undo(type, record) {
   this.record = record;
 }
 
-function saveCheck() {
-  let specialHoursSelected = false;
+function editCheck(event) {
+  let target = event.target.id;
 
-  // Need to account for Holiday
-  $('.custom-select').each(function() {
-    specialHoursSelected = (specialHoursSelected || ($(this).val() !== '0'));
-  });
+  console.log(event);
 
+  if (target == 'edit-holiday') {
+    if ($(this).is(':checked')) {
+      
+      $('.non-holiday').prop('disabled', true);
+      $('.btn-hours').addClass('btn-hours-disabled');
+      if ($('.times').length) { removeTimes(); }
+      $('#holiday-status').html('Yes');
+      $('#edit-save').prop('disabled', false);
+    }
+    else {
+      $('.non-holiday').prop('disabled', false);
+      $('#add').removeClass('btn-hours-disabled');
+      $('#remove').prop('disabled', true);
+      $('#holiday-status').html('No');
+      $('#edit-save').prop('disabled', true);
+    }
+  }
+  else {
+    let vacationValid = (($('#edit-vacation').val()) != '0');
+    let sickValid =  (($('#edit-sick').val()) != '0');
+
+    if (target === 'add') {
+      addTimes();
+    } else if (target === 'remove') {
+      removeTimes(':last');
+    }
+
+    if ((allTimesValid()) ||
+	(vacationValid && !allTimesValid()) ||
+	(sickValid && !allTimesValid())) {
+      $('#edit-save').prop('disabled', false);
+      $('#edit-holiday').prop('disabled', true);
+    }
+    else {
+      $('#edit-save').prop('disabled', true);
+      $('#edit-holiday').prop('disabled', false);
+    }
+  }
+}
+
+function allTimesValid() {
   let numTimes = $('.times').length;
   let allTimesValid = numTimes;
   
@@ -82,6 +120,9 @@ function saveCheck() {
     let leave  = moment(currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('HH:mm')));
     let prevLeave = moment('1970-01-01 00:00'); // Beginning of time
 
+    console.log(arrive);
+    console.log(leave);
+    
     if (time > 0) {
       prevLeave = moment(currentDate + ' ' + ($('#l-' + (time - 1)).datetimepicker('date').format('HH:mm')));
     }
@@ -102,20 +143,7 @@ function saveCheck() {
     }
   }
 
-  // If special hours are selected or all regular/talent times are valid, it's okay to save
-  if ((specialHoursSelected && (!numTimes)) ||
-      (allTimesValid) ||
-      ($('#edit-holiday').is(':checked'))) {
-    $('#edit-save').prop('disabled', false);
-    
-    if (!($('#edit-holiday').is(':checked'))) {
-      $('#edit-holiday').prop('disabled', true);
-    }
-  }
-  else {
-    $('#edit-save').prop('disabled', true);
-    $('#edit-holiday').prop('disabled', false);
-  }
+  return allTimesValid;
 }
 
 function init() {
@@ -148,16 +176,15 @@ function initSettings() {
 
 function initHandlers() {
   $('#settings').click(settings);
-  $('#add').click(addTimes);
-  $('#remove').click(removeTimes);
-  $('#delete').click(deleteRecord);
+  $('#add').click(editCheck);
+  $('#remove').click(editCheck);
+  $('#edit-holiday').change(editCheck);
+  $('.edit-select').change(editCheck);
   $('#edit-save').click(save);
   $('#print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
-  $('#edit-holiday').change(toggleHoliday);
   $('#settings-save').click(saveSettings);
-  $('.custom-select').change(saveCheck);
 }
 
 function undo() {
@@ -330,25 +357,20 @@ function addTimes() {
   $(arriveSelector).datetimepicker('date', '00:00');
   $(leaveSelector).datetimepicker('date', '00:00');
 
-  $(arriveSelector).on('change.datetimepicker', function() {
-    saveCheck();
+  $(arriveSelector).on('change.datetimepicker', function(event) {
+    editCheck(event);
   });
 
-  $(leaveSelector).on('change.datetimepicker', function() {
-    saveCheck();
+  $(leaveSelector).on('change.datetimepicker', function(event) {
+    editCheck(event);
   });
 
   $(hoursTypeSelector).change(toggleHoursType);
-
-  // Call saveCheck because new times will default to being invalid,
-  // and submission needs to account for these newly added times
-  saveCheck();
 }
 
-function removeTimes(event, instance = ':last') {
+function removeTimes(instance = '') {
   $('.times' + instance).children('.datetimepicker-input').datetimepicker('destroy');
   $('.times' + instance).remove();
-  saveCheck();
 
   // If there are no more times left, disable the remove button
   if (!($('.times').length)) {
@@ -490,7 +512,7 @@ function print() {
 	totalHoursPaid = talent;
       }
     }
-	
+    
     $(printWindow.document).contents().find('#due-date').html(formattedDueDate);
     $(printWindow.document).contents().find('#dates').html(startDate.format('M/D/YY') + ' - ' + endDate.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(table);
@@ -616,22 +638,6 @@ function toggleHoursType(event) {
   else {
     $(this).siblings().children('.toggle-status').html('Regular');
     $(this).closest('.col-auto').siblings(':last').find('input').prop('disabled', true);
-  }
-}
-
-function toggleHoliday(event) {
-  if ($(this).is(':checked')) {
-    $('.non-holiday').prop('disabled', true);
-    $('.btn-hours').addClass('btn-hours-disabled');
-    removeTimes(null, '');
-    $(this).siblings().children('.toggle-status').html('Yes');
-  }
-  else {
-    $('.non-holiday').prop('disabled', false);
-    $('#add').removeClass('btn-hours-disabled');
-    $('#remove').prop('disabled', true);
-    $(this).siblings().children('.toggle-status').html('No');
-    saveCheck();
   }
 }
 
