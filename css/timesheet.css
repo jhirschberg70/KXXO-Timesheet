@@ -76,6 +76,7 @@ body {
 }
 
 .invalid label,
+.invalid input,
 .invalid .datetimepicker-input,
 .invalid .input-group-text
 {
@@ -119,13 +120,14 @@ body {
   padding-top:.2rem;
 }
 
-
+/*
 .valid,
 .valid *,
 {
   border-color:rgb(206,212,218);
   color:rgb(33,37,41);
 }
+*/
 
 div#content-wrapper {
   position:relative;
