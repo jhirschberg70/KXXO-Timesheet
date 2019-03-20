@@ -131,7 +131,7 @@ function allTimesValid() {
     let leave  = moment(currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('HH:mm')));
     let prevLeave = moment('1970-01-01 00:00'); // Beginning of time
     let hoursType = $('#ht-' + time).val();
-    let rate = $('#r-' + time).children('input').val();
+    let rate = ($('#r-' + time).children('input').val());
 
     if (time > 0) {
       prevLeave = moment(currentDate + ' ' + ($('#l-' + (time - 1)).datetimepicker('date').format('HH:mm')));
@@ -158,13 +158,13 @@ function allTimesValid() {
       $('#r-' + time).parent().removeClass('invalid');
       $('#r-' + time).children('input').val('');
     }
-    
+
     if (($('#ht-' + time).is(':checked')) &&
-	(rate.match(/^\d+|\d+\.|\d+\.\d+$/))) {
+	(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{1,2})$/))) {
       $('#r-' + time).parent().removeClass('invalid');
     }
     else if (($('#ht-' + time).is(':checked')) &&
-	     (!(rate.match(/^\d+|\d+\.|\d+\.\d+$/)))) {
+	     (!(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{1,2})$/)))) {
       $('#r-' + time).parent().addClass('invalid');
       allTimesValid = false;
     }
@@ -332,7 +332,7 @@ function addTimes() {
   html += '</div>';
   html += '</div>';
   html += '</div>';
-  html += '<div class=\"col\">';
+  html += '<div class=\"col-sm-12- col-md\">';
   html += '<div class=\"form-group time invalid\">';
   html += '<label class="time-label">Arrive</label>';
   html += '<div class=\"input-group date\" id=\"' + arriveID + '\" data-target-input=\"nearest\">';
@@ -343,7 +343,7 @@ function addTimes() {
   html += '</div>';
   html += '</div>';
   html += '</div>';
-  html += '<div class=\"col\">';
+  html += '<div class=\"col-sm-12 col-md\">';
   html += '<div class=\"form-group time invalid\">';
   html += '<label class="time-label">Leave</label>';
   html += '<div class=\"input-group date\" id=\"' + leaveID + '\" data-target-input=\"nearest\">';
@@ -354,7 +354,7 @@ function addTimes() {
   html += '</div>';
   html += '</div>';
   html += '</div>';
-  html += '<div class=\"col\">';
+  html += '<div class=\"col-sm-12 col-md\">';
   html += '<div class=\"form-group rate\">';
   html += '<label>Rate</label>';
   html += '<div class=\"input-group input-group-sm\" id=\"' + rateID + '\">';
