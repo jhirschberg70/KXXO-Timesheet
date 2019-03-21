@@ -67,6 +67,7 @@ function Undo(type, record) {
 function editCheck(event) {
   let target = event.target.id;
   let targetSelector = '#' + target;
+  let instance = target.match(/\d+$/) ? target.match(/\d+$/)[0] : null;
 
   if (target == 'edit-holiday') {
     if ($(this).is(':checked')) {
@@ -91,18 +92,18 @@ function editCheck(event) {
 
     if (target === 'add') {
       addTimes();
-    } else if (target === 'remove') {
+    }
+    else if (target === 'remove') {
       removeTimes(':last');
-    } else if (target.match(/^ht-\d+$/)) {
+    }
+    else if (target.match(/^ht-\d+$/)) {
       if ($(targetSelector).is(':checked')) {
-	$(targetSelector).siblings().find('.toggle-status').html('Talent');
-	$(targetSelector).closest('.col-auto').siblings(':last').find('input').prop('disabled', false);
-	$(targetSelector).closest('.col-auto').siblings(':last').find('input').addClass('.invalid');
+	$('#s-' + instance).html('Talent');
+	$('#r-' + instance).prop('disabled', false).addClass('.invalid');
       }
       else {
-	$(targetSelector).siblings().find('.toggle-status').html('Regular');
-	$(targetSelector).closest('.col-auto').siblings(':last').find('input').prop('disabled', true);
-	$(targetSelector).closest('.col-auto').siblings(':last').find('input').removeClass('.invalid');
+	$('#s-' + instance).html('Regular');
+	$('#r-' + instance).prop('disabled', true).removeClass('.invalid');
       }
     }
 
@@ -131,49 +132,47 @@ function allTimesValid() {
     let leave  = moment(currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('HH:mm')));
     let prevLeave = moment('1970-01-01 00:00'); // Beginning of time
     let hoursType = $('#ht-' + time).val();
-    let rate = ($('#r-' + time).children('input').val());
+    let rate = $('#r-' + time).val();
 
     if (time > 0) {
       prevLeave = moment(currentDate + ' ' + ($('#l-' + (time - 1)).datetimepicker('date').format('HH:mm')));
     }
 
-    $('#a-' + time).parents('.time').removeClass('invalid');
-    $('#l-' + time).parents('.time').removeClass('invalid');
+    $('#times-' + time).find('.time').removeClass('invalid');
 
     // If leave is the same as or before arrive, times are invalid
     if (leave.isSameOrBefore(arrive)) {
-      $('#a-' + time).parents('.time').addClass('invalid');
-      $('#l-' + time).parents('.time').addClass('invalid');
+      $('#a-time-' + time).addClass('invalid');
+      $('#l-time-' + time).addClass('invalid');
       allTimesValid = false;
     }
 
     // If arrive is the same as or before previous leave, times are invalid
     if (arrive.isSameOrBefore(prevLeave)) {
-      $('#a-' + time).parents('.time').addClass('invalid');
-      $('#l-' + (time - 1)).parents('.time').addClass('invalid');
+      $('#a-time-' + time).addClass('invalid');
+      $('#l-time-' + (time - 1)).addClass('invalid');
       allTimesValid = false;
     }
 
     if (!($('#ht-' + time).is(':checked'))) {
-      $('#r-' + time).parent().removeClass('invalid');
-      $('#r-' + time).children('input').val('');
+      $('#r-group-' + time).removeClass('invalid');
+      $('#r-' + time).val('');
     }
 
     if (($('#ht-' + time).is(':checked')) &&
 	(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{1,2})$/))) {
-      $('#r-' + time).parent().removeClass('invalid');
+      $('#r-group-' + time).removeClass('invalid');
     }
     else if (($('#ht-' + time).is(':checked')) &&
 	     (!(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{1,2})$/)))) {
-      $('#r-' + time).parent().addClass('invalid');
+      $('#r-group-' + time).addClass('invalid');
       allTimesValid = false;
     }
     else {
-      $('#r-' + time).parent().removeClass('invalid');
+      $('#r-group-' + time).removeClass('invalid');
     }
   }
 
-  console.log(allTimesValid);
   return allTimesValid;
 }
 
@@ -311,16 +310,21 @@ function save() {
 
 function addTimes() {
   let numTimes = $('.times').length;
+  let timesID = 'times-' + numTimes;
+  let arriveTimeID = 'a-time-' + numTimes;
+  let leaveTimeID = 'l-time-' + numTimes;
   let arriveID = 'a-' + numTimes;
   let leaveID = 'l-' + numTimes;
   let hoursTypeID = 'ht-' + numTimes;
+  let statusID = 's-' + numTimes;
+  let rateGroupID = 'r-group-' + numTimes;
   let rateID = 'r-' + numTimes;
   let arriveSelector = '#' + arriveID
   let leaveSelector = '#' + leaveID;
   let hoursTypeSelector = '#' + hoursTypeID;
   let rateSelector = '#' + rateID;
 
-  let html = '<div class=\"form-row times\">';
+  let html = '<div id=\"' + timesID + '\" class=\"form-row times\">';
   html += '<div class=\"col-auto\">';
   html += '<div class=\"form-group\">';
   html += '<div class=\"d-block\">';
@@ -328,15 +332,15 @@ function addTimes() {
   html += '</div>';
   html += '<div class=\"custom-control custom-switch toggle\">';
   html += '<input type=\"checkbox\" class=\"custom-control-input non-holiday\" id=\"' + hoursTypeID + '\">';
-  html += '<label class=\"custom-control-label toggle-label\" for=\"' + hoursTypeID + '\"><div class=\"toggle-status\">Regular</div></label>';
+  html += '<label class=\"custom-control-label toggle-label\" for=\"' + hoursTypeID + '\"><div id=\"' + statusID + '\" class=\"toggle-status\">Regular</div></label>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
   html += '<div class=\"col-sm-12- col-md\">';
-  html += '<div class=\"form-group time invalid\">';
+  html += '<div id=\"' + arriveTimeID + '\" class=\"form-group time arrive invalid\">';
   html += '<label class="time-label">Arrive</label>';
   html += '<div class=\"input-group date\" id=\"' + arriveID + '\" data-target-input=\"nearest\">';
-  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + arriveSelector + '\" data-toggle=\"datetimepicker\"/>';
+  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + arriveSelector + '\" data-toggle=\"datetimepicker\">';
   html += '<div class=\"input-group-append\" data-target=\"' + arriveSelector + '\" data-toggle=\"datetimepicker\">';
   html += '<div class=\"input-group-text\"><i class=\"fa fa-clock-o\"></i></div>';
   html += '</div>';
@@ -344,10 +348,10 @@ function addTimes() {
   html += '</div>';
   html += '</div>';
   html += '<div class=\"col-sm-12 col-md\">';
-  html += '<div class=\"form-group time invalid\">';
+  html += '<div id=\"' + leaveTimeID + '\" class=\"form-group time leave invalid\">';
   html += '<label class="time-label">Leave</label>';
   html += '<div class=\"input-group date\" id=\"' + leaveID + '\" data-target-input=\"nearest\">';
-  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + leaveSelector + '\" data-toggle=\"datetimepicker\"/>';
+  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + leaveSelector + '\" data-toggle=\"datetimepicker\">';
   html += '<div class=\"input-group-append\" data-target=\"' + leaveSelector + '\" data-toggle=\"datetimepicker\">';
   html += '<div class=\"input-group-text\"><i class=\"fa fa-clock-o\"></i></div>';
   html += '</div>';
@@ -355,13 +359,13 @@ function addTimes() {
   html += '</div>';
   html += '</div>';
   html += '<div class=\"col-sm-12 col-md\">';
-  html += '<div class=\"form-group rate\">';
+  html += '<div id=\"' + rateGroupID + '\" class=\"form-group\">';
   html += '<label>Rate</label>';
-  html += '<div class=\"input-group input-group-sm\" id=\"' + rateID + '\">';
+  html += '<div class=\"input-group input-group-sm\"\">';
   html += '<div class=\"input-group-prepend\">';
   html += '<div class=\"input-group-text\">$</div>';
   html += '</div>';
-  html += '<input type=\"number\" class=\"form-control\" disabled>';
+  html += '<input type=\"number\" id=\"' + rateID + '\" class=\"form-control rate\" disabled>';
   html += '<div class=\"input-group-append\">';
   html += '<div class=\"input-group-text\">/hr</div>';
   html += '</div>';
@@ -521,7 +525,7 @@ function print() {
       $(printWindow.document).contents().find('#name').append('<span class="underline">' + name + '&nbsp;&nbsp;&nbsp;&nbsp;</span>');
     }
 
-    let formattedDueDate = dueDate.format('dddd, MMMM Do') + '<br/>' + dueDate.format('h:mm A');
+    let formattedDueDate = dueDate.format('dddd, MMMM Do') + '<br>' + dueDate.format('h:mm A');
     let totalHoursPaid = '';
 
     if (Number(regular + holiday + vacation + sick)) {
