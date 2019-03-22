@@ -4,7 +4,6 @@ let dueTime = '8:00 AM';
 let undoData;
 let name;
 let hoursPerDay;
-let timeStep;
 let hourStep;
 
 const DEFAULT_HOURS_PER_DAY = 8.00;
@@ -53,10 +52,9 @@ function Record(holiday, talent, vacation, sick, regular, times, activities) {
   this.activities = activities;
 }
 
-function Settings(name, hoursPerDay, timeStep) {
+function Settings(name, hoursPerDay) {
   this.name = name;
   this.hoursPerDay = hoursPerDay;
-  this.timeStep = timeStep;
 }
 
 function Undo(type, record) {
@@ -189,7 +187,6 @@ function initSettings() {
   // Initialize to defaults
   name = '';
   hoursPerDay = DEFAULT_HOURS_PER_DAY;
-  timeStep = DEFAULT_TIME_STEP;
   hourStep = DEFAULT_HOUR_STEP;
   
   let settings = JSON.parse(localStorage.getItem('settings'));
@@ -197,10 +194,8 @@ function initSettings() {
   if (settings) {
     name = settings.name;
     hoursPerDay = settings.hoursPerDay;
-    timeStep = settings.timeStep;
     $('#settings-name').val(settings.name);
     $('#settings-hours-per-day').val(settings.hoursPerDay);
-    $('#settings-time-step').val(settings.timeStep);
   }
 }
 
@@ -382,12 +377,12 @@ function addTimes() {
   
   $(arriveSelector).datetimepicker({
     format: 'LT',
-    stepping: timeStep
+    stepping: DEFAULT_TIME_STEP
   });
 
   $(leaveSelector).datetimepicker({
     format: 'LT',
-    stepping: timeStep
+    stepping: DEFAULT_TIME_STEP
   });
 
   $(arriveSelector).datetimepicker('date', '00:00');
@@ -670,9 +665,8 @@ function updateView(record) {
 function saveSettings() {
   name = $('#settings-name').val();
   hoursPerDay = $('#settings-hours-per-day').val();
-  timeStep = $('#settings-time-step').val();
   
-  let settings = new Settings(name, hoursPerDay, timeStep);
+  let settings = new Settings(name, hoursPerDay);
   
   localStorage.setItem('settings', JSON.stringify(settings));
 }
