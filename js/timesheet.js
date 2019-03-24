@@ -1,11 +1,11 @@
 let currentDate;
 let dueDate;
-let dueTime = '8:00 AM';
 let undoData;
 let name;
 let hoursPerDay;
 let hourStep;
 
+const DEFAULT_TIME_DUE = '8:00 AM';
 const DEFAULT_HOURS_PER_DAY = 8.00;
 const DEFAULT_HOUR_STEP = 0.25;
 const DEFAULT_TIME_STEP = 5;
@@ -55,6 +55,7 @@ function Record(holiday, talent, vacation, sick, regular, times, activities) {
 function Settings(name, hoursPerDay) {
   this.name = name;
   this.hoursPerDay = hoursPerDay;
+
 }
 
 function Undo(type, record) {
@@ -67,7 +68,7 @@ function editCheck(event) {
   let targetSelector = '#' + target;
   let instance = target.match(/\d+$/) ? target.match(/\d+$/)[0] : null;
 
-  if (target == 'edit-holiday') {
+  if (target === 'edit-holiday') {
     if ($(this).is(':checked')) {
       
       $('.non-holiday').prop('disabled', true);
@@ -97,17 +98,44 @@ function editCheck(event) {
     else if (target.match(/^ht-\d+$/)) {
       if ($(targetSelector).is(':checked')) {
 	$('#s-' + instance).html('Talent');
-	$('#r-' + instance).prop('disabled', false).addClass('.invalid');
+	$('#r-' + instance).prop('disabled', false);
       }
       else {
 	$('#s-' + instance).html('Regular');
-	$('#r-' + instance).prop('disabled', true).removeClass('.invalid');
+	$('#r-' + instance).prop('disabled', true);
+      }
+    }
+    // If rate is being changed, check to see that change is valid
+    // If it is, update input
+    else if (target.match(/^r-\d+$/)) {
+      let rate = $('#' + target).val();
+      let start = ($('#' + target).prop('selectionStart'));
+      let end = ($('#' + target).prop('selectionEnd'));
+
+      // If pasting, rate value hasn't been updated yet.  Get current value
+      // paste in value and check against valid currency format.  If valid
+      // update input.  If typing, rate value will already be updated.  Check
+      // against valid currency format.  If not valid, remove character that
+      // was typed in.
+      if (event.type === 'paste') {
+	let paste = event.originalEvent.clipboardData.getData('text');
+	rate = rate.substring(0, (start)) + paste + rate.substring(end);
+
+	if (rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/)) {
+	  $('#' + target).val(rate);
+	}
+      }
+      else {
+	if (!(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/))) {
+	  rate = rate.substring(0, (start - 1)) + rate.substring(start);
+	  $('#' + target).val(rate);	  
+	}
       }
     }
 
-    if ((allTimesValid()) ||
-	(vacationValid && !allTimesValid()) ||
-	(sickValid && !allTimesValid())) {
+    if ((hoursValid()) ||
+	(vacationValid && !hoursValid()) ||
+	(sickValid && !hoursValid())) {
       $('#edit-save').prop('disabled', false);
       $('#edit-holiday').prop('disabled', true);
     }
@@ -118,10 +146,10 @@ function editCheck(event) {
   }
 }
 
-function allTimesValid() {
+function hoursValid() {
   // Checks that times don't overlap and that hours marked as Talent have a valid rate set
   let numTimes = $('.times').length;
-  let allTimesValid = numTimes;
+  let hoursValid = numTimes;
   
   // Check that all times are valid.  First check that all arrive times are
   // < leave times.  Then check that return time is > previous leave time.
@@ -142,36 +170,31 @@ function allTimesValid() {
     if (leave.isSameOrBefore(arrive)) {
       $('#a-time-' + time).addClass('invalid');
       $('#l-time-' + time).addClass('invalid');
-      allTimesValid = false;
+      hoursValid = false;
     }
 
     // If arrive is the same as or before previous leave, times are invalid
     if (arrive.isSameOrBefore(prevLeave)) {
       $('#a-time-' + time).addClass('invalid');
       $('#l-time-' + (time - 1)).addClass('invalid');
-      allTimesValid = false;
+      hoursValid = false;
     }
 
     if (!($('#ht-' + time).is(':checked'))) {
       $('#r-group-' + time).removeClass('invalid');
       $('#r-' + time).val('');
     }
-
-    if (($('#ht-' + time).is(':checked')) &&
-	(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{1,2})$/))) {
-      $('#r-group-' + time).removeClass('invalid');
-    }
-    else if (($('#ht-' + time).is(':checked')) &&
-	     (!(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{1,2})$/)))) {
+    
+    if (($('#ht-' + time).is(':checked')) && !rate.length) {
       $('#r-group-' + time).addClass('invalid');
-      allTimesValid = false;
+      hoursValid = false;
     }
     else {
       $('#r-group-' + time).removeClass('invalid');
     }
   }
 
-  return allTimesValid;
+  return hoursValid;
 }
 
 function init() {
@@ -360,7 +383,7 @@ function addTimes() {
   html += '<div class=\"input-group-prepend\">';
   html += '<div class=\"input-group-text\">$</div>';
   html += '</div>';
-  html += '<input type=\"number\" id=\"' + rateID + '\" class=\"form-control rate\" disabled>';
+  html += '<input type=\"text\" id=\"' + rateID + '\" class=\"form-control rate\" disabled>';
   html += '<div class=\"input-group-append\">';
   html += '<div class=\"input-group-text\">/hr</div>';
   html += '</div>';
@@ -388,16 +411,23 @@ function addTimes() {
   $(arriveSelector).datetimepicker('date', '00:00');
   $(leaveSelector).datetimepicker('date', '00:00');
 
-  $(arriveSelector).on('change.datetimepicker', function(event) {
-    editCheck(event);
-  });
-
-  $(leaveSelector).on('change.datetimepicker', function(event) {
-    editCheck(event);
-  });
+  $(arriveSelector).on('change.datetimepicker', editCheck);
+  $(leaveSelector).on('change.datetimepicker', editCheck);
 
   $(hoursTypeSelector).change(editCheck);
-  $(rateSelector).change(editCheck);
+  $(rateSelector).on('paste', function(event) {
+    event.preventDefault();
+    editCheck(event);
+  });
+
+  $(rateSelector).on('input', function(event) {
+    if (event.originalEvent.inputType === 'insertFromPaste') {
+      event.preventDefault();
+    }
+    else {
+      editCheck(event);
+    }
+  });
 }
 
 function removeTimes(instance = '') {
