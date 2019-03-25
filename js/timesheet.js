@@ -119,16 +119,20 @@ function editCheck(event) {
       // was typed in.
       if (event.type === 'paste') {
 	let paste = event.originalEvent.clipboardData.getData('text');
+	let length = paste.length;
+	let cursor = end + (length - (end - start));
 	rate = rate.substring(0, (start)) + paste + rate.substring(end);
 
 	if (rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/)) {
 	  $('#' + target).val(rate);
+	  $('#' + target)[0].setSelectionRange(cursor, cursor);
 	}
       }
       else {
 	if (!(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/))) {
 	  rate = rate.substring(0, (start - 1)) + rate.substring(start);
-	  $('#' + target).val(rate);	  
+	  $('#' + target).val(rate);
+	  $('#' + target)[0].setSelectionRange(end - 1, end - 1);
 	}
       }
     }
