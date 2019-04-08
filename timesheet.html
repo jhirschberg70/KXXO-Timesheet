@@ -45,14 +45,14 @@
 		  <div class="navbar navbar-expand pr-0">
 		    <ul class="navbar-nav ml-auto">
 		      <li class="nav-item float-right">
-			<a id="edit-save" href="#">
+			<button id="edit-save" class="btn-circle" disabled>
 			  <i class="fa fa-lg fa-floppy-o"></i>
-			</a>
+			</button>
 		      </li>
-		      <li class="nav-item" disabled>
-			<a id="edit-delete" href="#">
+		      <li class="nav-item">
+			<button id="edit-delete" class="btn-circle" disabled>
 			  <i class="fa fa-lg fa-trash-o"></i>
-			</a>
+			</button>
 		      </li>
 		    </ul>
 		  </div>
@@ -92,8 +92,8 @@
 		  <div class="form-row">
 		    <div class="col form-group">
 		      <label>Hours Worked</label>
-		      <div id="add" class="btn-circle btn-hours non-holiday" role="button">+</div>
-		      <div id="remove" class="btn-circle btn-hours btn-hours-disabled non-holiday" role="button">-</div>
+		      <button id="add" class="btn-circle btn-hours non-holiday" role="button">+</button>
+		      <button id="remove" class="btn-circle btn-hours btn-disabled non-holiday" role="button" disabled>-</button>
 		      <div id="edit-hours-worked">
 		      </div>
 		    </div>

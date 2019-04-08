@@ -7,6 +7,10 @@ body {
   //  font-family:'Roboto', sans-serif;
 }
 
+button {
+  color:rgb(33,37,41);
+}
+
 .bg-gradient-primary {
   background-color: #4e73df;
   background-image: -webkit-gradient(linear,left top,left bottom,color-stop(10%,#4e73df),to(#224abe));
@@ -27,13 +31,9 @@ body {
 
 .btn-circle {
   border-radius:100%;
-  color:rgb(33,37,41);
-  display:inline-flex;
-  width:1.5rem;
-  height:1.5rem;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+  border:0;
+  background:transparent;
+  width:26px;
   transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
@@ -41,16 +41,17 @@ body {
   background:rgb(206,212,218);
 }
 
-.btn-circle:focus, btn-circle:active {
-  box-shadow:none; // controls outline of button in bootstrap after it's clicked
+.btn-circle:focus {
+  outline:0;
+  box-shadow:0 0 0 .2rem rgba(0,123,255,.25)
 }
 
-.btn-hours-disabled {
+.btn-disabled {
   color:rgb(233,236,239);
+  background:transparent;
 }
 
-.btn-hours-disabled:hover {
-  color:rgb(233,236,239);
+.btn-disabled:hover {
   background:transparent;
 }
 
@@ -121,13 +122,13 @@ body {
 }
 
 /*
-.valid,
-.valid *,
-{
-  border-color:rgb(206,212,218);
-  color:rgb(33,37,41);
-}
-*/
+   .valid,
+   .valid *,
+   {
+   border-color:rgb(206,212,218);
+   color:rgb(33,37,41);
+   }
+ */
 
 div#content-wrapper {
   position:relative;

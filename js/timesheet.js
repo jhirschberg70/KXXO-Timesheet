@@ -70,16 +70,15 @@ function editCheck(event) {
 
   if (target === 'edit-holiday') {
     if ($(this).is(':checked')) {
-      
       $('.non-holiday').prop('disabled', true);
-      $('.btn-hours').addClass('btn-hours-disabled');
+      $('.btn-hours').addClass('btn-disabled');
       if ($('.times').length) { removeTimes(); }
       $('#holiday-status').html('Yes');
       $('#edit-save').prop('disabled', false);
     }
     else {
       $('.non-holiday').prop('disabled', false);
-      $('#add').removeClass('btn-hours-disabled');
+      $('#add').removeClass('btn-disabled');
       $('#remove').prop('disabled', true);
       $('#holiday-status').html('No');
       $('#edit-save').prop('disabled', true);
@@ -226,6 +225,64 @@ function initSettings() {
   }
 }
 
+function initSelects() {
+  // Initialize hour selects
+  let chooseHours = '\<option value=\"0\"\>Choose hours\<\/option\>\n';
+
+  $('.edit-select').append(chooseHours);
+  
+  for (let value = 1; value <= hoursPerDay/hourStep; value++) {
+    $('.edit-select').append('\<option value=\"' + value + '\"\>' + (value * hourStep) + '\<\/option\>\n');
+  }
+}
+
+function initSetDate() {
+  // Update locale to have Monday be the start of the week
+  moment.updateLocale("en", { week: {
+    dow: 1, // First day of week is Monday
+    doy: 7  // First week of year must contain 1 January (7 + 1 - 1)
+  }});
+  
+  // Initialize datepickers
+  $('#set-date').datetimepicker({
+    inline: true,
+    format: 'YYYY-MM-DD'
+  });
+
+  $('#set-date').on('change.datetimepicker', function() {
+    view($('#set-date').datetimepicker('date'));
+  });
+}
+
+function initDueDate() {
+  // Determine due date
+  // If end of period is Sunday, subtract two days to get due date
+  // If end of period is Saturday, subtract one day to get due date
+
+  // Assume end of period is the 15th
+  let endOfPeriod = 15;
+  
+  if (moment().date() > 15) {
+    endOfPeriod = moment().endOf('month').date();
+  }
+
+  if (moment().date(endOfPeriod).day() === 0) {
+    dueDate = moment().date(endOfPeriod).subtract(2, 'days');
+  }
+  else if (moment().date(endOfPeriod).day() === 6) {
+    dueDate = moment().date(endOfPeriod).subtract(2, 'days');
+  }
+  else {
+    dueDate = moment().date(endOfPeriod);
+  }
+
+  // Time sheets must always be turned in by 8:00 am
+  dueDate.hour(8);
+  dueDate.minute(0);
+
+  $('#due-date').prepend('Timesheet Due:  ' + dueDate.format('dddd, MMMM Do h:mm A'));
+}
+
 function initHandlers() {
   $('#settings').click(settings);
   $('#add').click(editCheck);
@@ -258,7 +315,22 @@ function view(date) {
   // Check to see if current date has a record
   let record = JSON.parse(localStorage.getItem(currentDate));
   
-  updateView(record);
+  if (record) {
+    $('#edit-activities').val(record.activities);
+    $('#edit-holiday').prop('checked', record.holiday);
+    $('#edit-vacation').val(record.vacation);
+    $('#edit-sick').val(record.sick);
+    $('#edit-regular').html(record.times ? record.times + ', ' + record.regular : '');
+    $('#delete').removeClass('hide');
+  }
+  else {
+    // Clear everything out
+    $('#edit-activities').val('');
+    $('#edit-holiday').prop('checked', false).prop('disabled', false);
+    $('#edit-vacation').val(0);
+    $('#edit-sick').val(0);
+    removeTimes();
+  }
 }
 
 function settings() {
@@ -400,7 +472,7 @@ function addTimes() {
   $('#edit-hours-worked').append(html);
 
   // Enable removal of times
-  $('#remove').prop('disabled', false).removeClass('btn-hours-disabled');
+  $('#remove').prop('disabled', false).removeClass('btn-disabled');
   
   $(arriveSelector).datetimepicker({
     format: 'LT',
@@ -440,7 +512,7 @@ function removeTimes(instance = '') {
 
   // If there are no more times left, disable the remove button
   if (!($('.times').length)) {
-    $('#remove').prop('disabled', true).addClass('btn-hours-disabled');
+    $('#remove').prop('disabled', true).addClass('btn-disabled');
   }
 }
 
@@ -590,64 +662,6 @@ function print() {
   }
 }
 
-function initSelects() {
-  // Initialize hour selects
-  let chooseHours = '\<option value=\"0\"\>Choose hours\<\/option\>\n';
-
-  $('.edit-select').append(chooseHours);
-  
-  for (let value = 1; value <= hoursPerDay/hourStep; value++) {
-    $('.edit-select').append('\<option value=\"' + value + '\"\>' + (value * hourStep) + '\<\/option\>\n');
-  }
-}
-
-function initSetDate() {
-  // Update locale to have Monday be the start of the week
-  moment.updateLocale("en", { week: {
-    dow: 1, // First day of week is Monday
-    doy: 7  // First week of year must contain 1 January (7 + 1 - 1)
-  }});
-  
-  // Initialize datepickers
-  $('#set-date').datetimepicker({
-    inline: true,
-    format: 'YYYY-MM-DD'
-  });
-
-  $('#set-date').on('change.datetimepicker', function() {
-    view($('#set-date').datetimepicker('date'));
-  });
-}
-
-function initDueDate() {
-  // Determine due date
-  // If end of period is Sunday, subtract two days to get due date
-  // If end of period is Saturday, subtract one day to get due date
-
-  // Assume end of period is the 15th
-  let endOfPeriod = 15;
-  
-  if (moment().date() > 15) {
-    endOfPeriod = moment().endOf('month').date();
-  }
-
-  if (moment().date(endOfPeriod).day() === 0) {
-    dueDate = moment().date(endOfPeriod).subtract(2, 'days');
-  }
-  else if (moment().date(endOfPeriod).day() === 6) {
-    dueDate = moment().date(endOfPeriod).subtract(2, 'days');
-  }
-  else {
-    dueDate = moment().date(endOfPeriod);
-  }
-
-  // Time sheets must always be turned in by 8:00 am
-  dueDate.hour(8);
-  dueDate.minute(0);
-
-  $('#due-date').prepend('Timesheet Due:  ' + dueDate.format('dddd, MMMM Do h:mm A'));
-}
-
 function deleteRecord() {
   let record = JSON.parse(localStorage.getItem(currentDate));
 
@@ -676,24 +690,6 @@ function updateStatus(msg) {
 
 function statusDismiss() {
   $('#status').fadeOut(400);
-}
-
-function updateView(record) {
-  if (record) {
-    $('#edit-activities').html(record.activities);
-    $('#edit-holiday').html(record.holiday);
-    $('#edit-vacation').html(record.vacation);
-    $('#edit-sick').html(record.sick);
-    $('#edit-regular').html(record.times ? record.times + ', ' + record.regular : '');
-    $('#delete').removeClass('hide');
-  }
-  else {
-    // Clear everything out
-    $('#edit-activities').html('');
-    $('#edit-holiday').html('-');
-    $('custom-select').val(0);
-    removeTimes(null, '');
-  }
 }
 
 function saveSettings() {
