@@ -13,9 +13,8 @@ const STORAGE_DLM = '\u0000';
 const STATUS_TIMEOUT = 5000;
 const UNDONE_TIMEOUT = 1250;
 
-function Record(holiday, talent, vacation, sick, regular, times, activities) {
+function Record(holiday, vacation, sick, regular, times, activities) {
   this.holiday = holiday;
-  this.talent = talent;
   this.vacation = vacation;
   this.sick = sick;
   this.regular = regular;
@@ -31,11 +30,6 @@ function Record(holiday, talent, vacation, sick, regular, times, activities) {
   if (holiday) {
     if (total) { total += ' + ';}
     total += holiday + 'H';
-  }
-
-  if (talent) {
-    if (total) { total += ' + ';}
-    total += talent + 'T';
   }
 
   if (vacation) {
@@ -253,8 +247,9 @@ function initSetDate() {
     format: 'YYYY-MM-DD'
   });
 
-  $('#set-date').on('change.datetimepicker', function() {
+  $('#set-date').on('change.datetimepicker', function(event) {
     view($('#set-date').datetimepicker('date'));
+    editCheck(event);
   });
 }
 
@@ -322,10 +317,10 @@ function view(date) {
   if (record) {
     $('#edit-activities').val(record.activities);
     $('#edit-holiday').prop('checked', record.holiday);
+    $('#holiday-status').html(record.holiday ? 'Yes' : 'No');
     $('#edit-vacation').val(record.vacation);
     $('#edit-sick').val(record.sick);
-    $('#edit-regular').html(record.times ? record.times + ', ' + record.regular : '');
-    $('#delete').removeClass('hide');
+    $('#edit-hours-worked').html(record.times ? record.times + ', ' + record.regular : '');
   }
   else {
     // Clear everything out
@@ -381,15 +376,17 @@ function save() {
     times += arrive.format('LT') + '-' + leave.format('LT');
     regular += leave.diff(arrive, 'hours', true);
   });
+
+
   
-  let record = new Record(($('#edit-holiday').val() * hourStep),
-			  ($('#edit-talent').val() * hourStep),
+  let record = new Record(($('#edit-holiday').prop('checked')),
 			  ($('#edit-vacation').val() * hourStep),
 			  ($('#edit-sick').val() * hourStep),
 			  regular,
 			  times,
 			  $('#edit-activities').val());
 
+    
   localStorage.setItem(currentDate, JSON.stringify(record));
 
   let status = '';
