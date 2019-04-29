@@ -33,7 +33,6 @@ button {
   border-radius:100%;
   border:0;
   background:transparent;
-  width:26px;
   transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
@@ -44,6 +43,15 @@ button {
 .btn-circle:focus {
   outline:0;
   box-shadow:0 0 0 .2rem rgba(0,123,255,.25)
+}
+
+.btn-circle-sm {
+  width:26px;  
+}
+
+.btn-circle-md {
+  width:36px;
+  height:36px;
 }
 
 .btn-disabled {
@@ -117,7 +125,7 @@ button {
 }
 
 .toggle-status {
-  width:2.78rem;
+  width:2.88rem;
   padding-top:.2rem;
 }
 

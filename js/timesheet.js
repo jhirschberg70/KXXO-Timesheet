@@ -68,20 +68,24 @@ function editCheck(event) {
   let targetSelector = '#' + target;
   let instance = target.match(/\d+$/) ? target.match(/\d+$/)[0] : null;
 
+  // Default to saving and deleting record being disabled
+  $('#edit-save').prop('disabled', true).addClass('btn-disabled');
+  $('#edit-delete').prop('disabled', true).addClass('btn-disabled');
+
   if (target === 'edit-holiday') {
     if ($(this).is(':checked')) {
       $('.non-holiday').prop('disabled', true);
       $('.btn-hours').addClass('btn-disabled');
-      if ($('.times').length) { removeTimes(); }
       $('#holiday-status').html('Yes');
-      $('#edit-save').prop('disabled', false);
+      $('#edit-save').prop('disabled', false).removeClass('btn-disabled');
+      $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
+      if ($('.times').length) { removeTimes(); }
     }
     else {
       $('.non-holiday').prop('disabled', false);
       $('#add').removeClass('btn-disabled');
       $('#remove').prop('disabled', true);
       $('#holiday-status').html('No');
-      $('#edit-save').prop('disabled', true);
     }
   }
   else {
@@ -139,11 +143,11 @@ function editCheck(event) {
     if ((hoursValid()) ||
 	(vacationValid && !hoursValid()) ||
 	(sickValid && !hoursValid())) {
-      $('#edit-save').prop('disabled', false);
+      $('#edit-save').prop('disabled', false).removeClass('btn-disabled');
+      $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
       $('#edit-holiday').prop('disabled', true);
     }
     else {
-      $('#edit-save').prop('disabled', true);
       $('#edit-holiday').prop('disabled', false);
     }
   }
