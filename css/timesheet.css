@@ -46,7 +46,8 @@ button {
 }
 
 .btn-circle-sm {
-  width:26px;  
+  width:26px;
+  height:26px;
 }
 
 .btn-circle-md {

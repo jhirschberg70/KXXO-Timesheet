@@ -63,38 +63,40 @@
 		    </div>
 		  </div>
 		  <hr>
-		  <div class="form-row">
-		    <div class="col-auto form-group">
-		      <div class="d-block">
-			<label>Holiday</label>
+		  <div id="record">
+		    <div class="form-row">
+		      <div class="col-auto form-group">
+			<div class="d-block">
+			  <label>Holiday</label>
+			</div>
+			<div class="custom-control custom-switch toggle">
+			  <input type="checkbox" class="custom-control-input" id="edit-holiday">
+			  <label class="custom-control-label toggle-label" for="edit-holiday"><div id="holiday-status" class="toggle-status">No</div></label>
+			</div>
 		      </div>
-		      <div class="custom-control custom-switch toggle">
-			<input type="checkbox" class="custom-control-input" id="edit-holiday">
-			<label class="custom-control-label toggle-label" for="edit-holiday"><div id="holiday-status" class="toggle-status">No</div></label>
+		      <div class="col-sm-12 col-md form-group">
+			<label>Activities</label>
+			<input type="text" id="edit-activities" class="form-control form-control-sm" value=""/>
+		      </div>
+		      <div class="col-sm-12 col-md form-group">
+			<label>Vacation</label>
+			<select id="edit-vacation" class="custom-select custom-select-sm edit-select non-holiday">
+			</select>
+		      </div>
+		      <div class="col-sm-12 col-md form-group">
+			<label>Sick Leave</label>
+			<select id="edit-sick" class="custom-select custom-select-sm edit-select non-holiday">
+			</select>
 		      </div>
 		    </div>
-		    <div class="col-sm-12 col-md form-group">
-		      <label>Activities</label>
-		      <input type="text" id="edit-activities" class="form-control form-control-sm" value=""/>
-		    </div>
-		    <div class="col-sm-12 col-md form-group">
-		      <label>Vacation</label>
-		      <select id="edit-vacation" class="custom-select custom-select-sm edit-select non-holiday">
-		      </select>
-		    </div>
-		    <div class="col-sm-12 col-md form-group">
-		      <label>Sick Leave</label>
-		      <select id="edit-sick" class="custom-select custom-select-sm edit-select non-holiday">
-		      </select>
-		    </div>
-		  </div>
-		  <br />
-		  <div class="form-row">
-		    <div class="col form-group">
-		      <label>Hours Worked</label>
-		      <button id="add" class="btn-circle btn-circle-sm btn-hours non-holiday" role="button">+</button>
-		      <button id="remove" class="btn-circle btn-circle-sm btn-hours btn-disabled non-holiday" role="button" disabled>-</button>
-		      <div id="edit-hours-worked">
+		    <br />
+		    <div class="form-row">
+		      <div class="col form-group">
+			<label>Hours Worked</label>
+			<button id="add" class="btn-circle btn-circle-sm btn-hours non-holiday" role="button">+</button>
+			<button id="remove" class="btn-circle btn-circle-sm btn-hours btn-disabled non-holiday" role="button" disabled>-</button>
+			<div id="edit-hours-worked">
+			</div>
 		      </div>
 		    </div>
 		  </div>

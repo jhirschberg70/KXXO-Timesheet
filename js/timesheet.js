@@ -1,3 +1,12 @@
+const DEFAULT_TIME_DUE = '8:00 AM';
+const DEFAULT_HOURS_PER_DAY = 8.00;
+const DEFAULT_HOUR_STEP = 0.0833;
+const DEFAULT_TIME_STEP = 5;
+const STORAGE_DLM = '\u0000';
+const HOURS_STORAGE_DLM = '\u0001';
+const STATUS_TIMEOUT = 5000;
+const UNDONE_TIMEOUT = 1250;
+
 let currentDate;
 let dueDate;
 let undoData;
@@ -5,51 +14,24 @@ let name;
 let hoursPerDay;
 let hourStep;
 
-const DEFAULT_TIME_DUE = '8:00 AM';
-const DEFAULT_HOURS_PER_DAY = 8.00;
-const DEFAULT_HOUR_STEP = 0.25;
-const DEFAULT_TIME_STEP = 5;
-const STORAGE_DLM = '\u0000';
-const STATUS_TIMEOUT = 5000;
-const UNDONE_TIMEOUT = 1250;
-
-function Record(holiday, vacation, sick, regular, times, activities) {
+function Record(holiday, activities, vacation, sick, hours) {
   this.holiday = holiday;
+  this.activities = activities;
   this.vacation = vacation;
   this.sick = sick;
-  this.regular = regular;
-  this.times = times;
+  this.hours = hours;
+}
 
-  // Set up totalHours
-  let total = '';
-
-  if (regular) {
-    total += regular;
-  }
-
-  if (holiday) {
-    if (total) { total += ' + ';}
-    total += holiday + 'H';
-  }
-
-  if (vacation) {
-    if (total) { total += ' + ';}
-    total += vacation + 'V';
-  }
-
-  if (sick) {
-    if (total) { total += ' + ';}
-    total += sick + 'S';
-  }
-  
-  this.total = total;
-  this.activities = activities;
+function Hours(hoursType, arrive, leave, rate) {
+  this.hoursType = hoursType;
+  this.arrive = arrive;
+  this.leave = leave;
+  this.rate = rate;
 }
 
 function Settings(name, hoursPerDay) {
   this.name = name;
   this.hoursPerDay = hoursPerDay;
-
 }
 
 function Undo(type, record) {
@@ -249,7 +231,7 @@ function initSetDate() {
 
   $('#set-date').on('change.datetimepicker', function(event) {
     view($('#set-date').datetimepicker('date'));
-    editCheck(event);
+//    editCheck(event);
   });
 }
 
@@ -289,6 +271,7 @@ function initHandlers() {
   $('#edit-holiday').change(editCheck);
   $('.edit-select').change(editCheck);
   $('#edit-save').click(save);
+  $('#edit-delete').click(editCheck);
   $('#print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
@@ -313,22 +296,53 @@ function view(date) {
 
   // Check to see if current date has a record
   let record = JSON.parse(localStorage.getItem(currentDate));
-  
+
+  // First clear everything out as if nothing has been set, then process record
+  $('#edit-activities').val('');
+  $('#edit-holiday').prop('checked', false).prop('disabled', false);
+  $('#holiday-status').html('No');
+  $('.edit-select').val(0).prop('disabled', false);
+  removeTimes();
+  $('#add').prop('disabled', false).removeClass('btn-disabled');
+  $('#edit-save').prop('disabled', true).addClass('btn-disabled');
+  $('#edit-delete').prop('disabled', true).addClass('btn-disabled');
+
   if (record) {
     $('#edit-activities').val(record.activities);
-    $('#edit-holiday').prop('checked', record.holiday);
-    $('#holiday-status').html(record.holiday ? 'Yes' : 'No');
     $('#edit-vacation').val(record.vacation);
     $('#edit-sick').val(record.sick);
-    $('#edit-hours-worked').html(record.times ? record.times + ', ' + record.regular : '');
-  }
-  else {
-    // Clear everything out
-    $('#edit-activities').val('');
-    $('#edit-holiday').prop('checked', false).prop('disabled', false);
-    $('#edit-vacation').val(0);
-    $('#edit-sick').val(0);
-    removeTimes();
+
+    if (record.holiday) {
+      $('#edit-holiday').trigger('click');
+    }
+
+    if (record.vacation) {
+      $('#edit-vacation').change();
+    }
+
+    if (record.sick) {
+      $('#edit-sick').change();
+    }
+
+    if (record.hours) {
+      let hours = (record.hours).split(HOURS_STORAGE_DLM);
+
+      hours.forEach(function(value, index) {
+	$('#add').trigger('click');
+	let _hours = JSON.parse(hours[index]);
+	
+	$('#a-' + index).datetimepicker('date', _hours.arrive);
+	$('#l-' + index).datetimepicker('date', _hours.leave);
+	$('#r-' + index).val(_hours.rate);
+
+	if (_hours.hoursType) {
+	  $('#ht-' + index).trigger('click');
+	}
+	else {
+	  $('#l-' + index).trigger('change');
+	}
+      });
+    }
   }
 }
 
@@ -366,26 +380,45 @@ function settings() {
 }
 
 function save() {
+  /*
+     Items to save
+     $('#edit-holiday').prop('checked');
+     $('#edit-activities').val();
+     $('#edit-vacation').val();
+     $('#edit-sick').val();
+     $('#ht-x').prop('checked');
+     $('#a-x').datetimepicker('date');
+     $('#l-x').datetimepicker('date');
+     $('#r-x').val();
+     $('#r-x').prop('disabled');
+   */
+
   let regular = 0;
-  let times = '';
+  let hours = '';
 
   $('.times').each(function(index) {
-    let arrive = $('#a-' + index).datetimepicker('date');
-    let leave = $('#l-' + index).datetimepicker('date');
-    if (times) { times += ', ';}
-    times += arrive.format('LT') + '-' + leave.format('LT');
-    regular += leave.diff(arrive, 'hours', true);
+    let _hours = new Hours(($('#ht-' + index).is(':checked')),
+			   ($('#a-' + index).datetimepicker('date').format('LT')),
+			   ($('#l-' + index).datetimepicker('date').format('LT')),
+			   ($('#r-' + index).val()));
+    if (hours) {
+      hours += HOURS_STORAGE_DLM;
+    }
+    
+    hours += JSON.stringify(_hours);
+    
+    //    if (times) { times += ', '; }
+    // times += arrive.format('LT') + '-' + leave.format('LT');
+    // regular += leave.diff(arrive, 'hours', true);
   });
 
 
   
   let record = new Record(($('#edit-holiday').prop('checked')),
-			  ($('#edit-vacation').val() * hourStep),
-			  ($('#edit-sick').val() * hourStep),
-			  regular,
-			  times,
-			  $('#edit-activities').val());
-
+			  ($('#edit-activities').val()),
+			  ($('#edit-vacation').val()),
+			  ($('#edit-sick').val()),
+			  hours);
     
   localStorage.setItem(currentDate, JSON.stringify(record));
 
@@ -400,7 +433,7 @@ function save() {
   }
 
   updateStatus(status);
-  view(currentDate);
+//  view(currentDate);
 }
 
 function addTimes() {
