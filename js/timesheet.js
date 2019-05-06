@@ -64,10 +64,13 @@ function editCheck(event) {
       $('#holiday-status').html('No');
     }
   }
+  else if (target === 'edit-delete') {
+    deleteRecord();
+  }
   else {
     let vacationValid = (($('#edit-vacation').val()) != '0');
     let sickValid =  (($('#edit-sick').val()) != '0');
-
+    
     if (target === 'add') {
       addTimes();
     }
@@ -90,7 +93,7 @@ function editCheck(event) {
       let rate = $('#' + target).val();
       let start = ($('#' + target).prop('selectionStart'));
       let end = ($('#' + target).prop('selectionEnd'));
-
+      
       // If pasting, rate value hasn't been updated yet.  Get current value
       // paste in value and check against valid currency format.  If valid
       // update input.  If typing, rate value will already be updated.  Check
@@ -101,7 +104,7 @@ function editCheck(event) {
 	let length = paste.length;
 	let cursor = end + (length - (end - start));
 	rate = rate.substring(0, (start)) + paste + rate.substring(end);
-
+	
 	if (rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/)) {
 	  $('#' + target).val(rate);
 	  $('#' + target)[0].setSelectionRange(cursor, cursor);
@@ -115,7 +118,7 @@ function editCheck(event) {
 	}
       }
     }
-
+    
     if ((hoursValid()) ||
 	(vacationValid && !hoursValid()) ||
 	(sickValid && !hoursValid())) {
@@ -231,7 +234,7 @@ function initSetDate() {
 
   $('#set-date').on('change.datetimepicker', function(event) {
     view($('#set-date').datetimepicker('date'));
-//    editCheck(event);
+    //    editCheck(event);
   });
 }
 
@@ -298,15 +301,8 @@ function view(date) {
   let record = JSON.parse(localStorage.getItem(currentDate));
 
   // First clear everything out as if nothing has been set, then process record
-  $('#edit-activities').val('');
-  $('#edit-holiday').prop('checked', false).prop('disabled', false);
-  $('#holiday-status').html('No');
-  $('.edit-select').val(0).prop('disabled', false);
-  removeTimes();
-  $('#add').prop('disabled', false).removeClass('btn-disabled');
-  $('#edit-save').prop('disabled', true).addClass('btn-disabled');
-  $('#edit-delete').prop('disabled', true).addClass('btn-disabled');
-
+  clear();
+  
   if (record) {
     $('#edit-activities').val(record.activities);
     $('#edit-vacation').val(record.vacation);
@@ -344,6 +340,17 @@ function view(date) {
       });
     }
   }
+}
+
+function clear() {
+  $('#edit-activities').val('');
+  $('#edit-holiday').prop('checked', false).prop('disabled', false);
+  $('#holiday-status').html('No');
+  $('.edit-select').val(0).prop('disabled', false);
+  $('#add').prop('disabled', false).removeClass('btn-disabled');
+  $('#edit-save').prop('disabled', true).addClass('btn-disabled');
+  $('#edit-delete').prop('disabled', true).addClass('btn-disabled');
+  removeTimes();
 }
 
 function settings() {
@@ -419,7 +426,7 @@ function save() {
 			  ($('#edit-vacation').val()),
 			  ($('#edit-sick').val()),
 			  hours);
-    
+  
   localStorage.setItem(currentDate, JSON.stringify(record));
 
   let status = '';
@@ -433,7 +440,7 @@ function save() {
   }
 
   updateStatus(status);
-//  view(currentDate);
+  //  view(currentDate);
 }
 
 function addTimes() {

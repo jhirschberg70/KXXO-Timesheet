@@ -151,6 +151,22 @@ div#holiday-status {
   padding-top:.2rem;
 }
 
+div#status {
+  position:fixed;
+  width:250px;
+  left:calc(50% - 125px);
+  bottom:10px;
+  background:rgb(52,58,64);
+  color:#fff;
+  padding:10px;
+  border-radius:4px;
+  display:none;
+}
+
+i#status-dismiss:hover {
+  cursor:pointer;
+}
+
 div#wrapper {
   display:flex;
   height:100%;
