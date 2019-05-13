@@ -14,12 +14,41 @@ let name;
 let hoursPerDay;
 let hourStep;
 
-function Record(holiday, activities, vacation, sick, hours) {
+function Record(holiday, activities, vacation, sick, regular, talent, hours) {
   this.holiday = holiday;
   this.activities = activities;
   this.vacation = vacation;
   this.sick = sick;
   this.hours = hours;
+  this.regular = regular;
+
+  let total = '';
+
+  if (regular) {
+    total += regular;
+  }
+
+  if (holiday) {
+    if (total) { total += ' + ';}
+    total += holiday + 'H';
+  }
+
+  if (vacation) {
+    if (total) { total += ' + ';}
+    total += vacation + 'V';
+  }
+
+  if (sick) {
+    if (total) { total += ' + ';}
+    total += sick + 'S';
+  }
+
+  if (talent) {
+    if (total) { total += ' + ';}
+    total += talent + 'T';
+  }
+  
+  this.total = total;
 }
 
 function Hours(hoursType, arrive, leave, rate) {
@@ -399,8 +428,8 @@ function save() {
      $('#r-x').val();
      $('#r-x').prop('disabled');
    */
-
   let regular = 0;
+  let talent = 0;
   let hours = '';
 
   $('.times').each(function(index) {
@@ -411,21 +440,30 @@ function save() {
     if (hours) {
       hours += HOURS_STORAGE_DLM;
     }
-    
+    console.log(_hours.arrive);
+    console.log(_hours.leave);
+    console.log();
     hours += JSON.stringify(_hours);
+    
+    if (_hours.hoursType) {
+      talent += moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true);
+    }
+    else {
+      regular += moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true);
+    }
     
     //    if (times) { times += ', '; }
     // times += arrive.format('LT') + '-' + leave.format('LT');
     // regular += leave.diff(arrive, 'hours', true);
   });
 
-
-  
-  let record = new Record(($('#edit-holiday').prop('checked')),
+  let record = new Record((($('#edit-holiday').prop('checked')) ? hoursPerDay : 0),
 			  ($('#edit-activities').val()),
 			  ($('#edit-vacation').val()),
 			  ($('#edit-sick').val()),
-			  hours);
+			  talent,
+			  hours,
+			  regular);
   
   localStorage.setItem(currentDate, JSON.stringify(record));
 
