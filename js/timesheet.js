@@ -14,7 +14,7 @@ let name;
 let hoursPerDay;
 let hourStep;
 
-function Record(holiday, activities, vacation, sick, regular, talent, hours) {
+function Record(holiday, activities, vacation, sick, hours, regular) {
   this.holiday = holiday;
   this.activities = activities;
   this.vacation = vacation;
@@ -43,11 +43,6 @@ function Record(holiday, activities, vacation, sick, regular, talent, hours) {
     total += sick + 'S';
   }
 
-  if (talent) {
-    if (total) { total += ' + ';}
-    total += talent + 'T';
-  }
-  
   this.total = total;
 }
 
@@ -350,11 +345,11 @@ function view(date) {
     }
 
     if (record.hours) {
-      let hours = (record.hours).split(HOURS_STORAGE_DLM);
+      let hours = JSON.parse(record.hours);
 
       hours.forEach(function(value, index) {
 	$('#add').trigger('click');
-	let _hours = JSON.parse(hours[index]);
+	let _hours = JSON.parse(value);
 	
 	$('#a-' + index).datetimepicker('date', _hours.arrive);
 	$('#l-' + index).datetimepicker('date', _hours.leave);
@@ -430,20 +425,20 @@ function save() {
    */
   let regular = 0;
   let talent = 0;
-  let hours = '';
+  let hours = [];
 
   $('.times').each(function(index) {
     let _hours = new Hours(($('#ht-' + index).is(':checked')),
 			   ($('#a-' + index).datetimepicker('date').format('LT')),
 			   ($('#l-' + index).datetimepicker('date').format('LT')),
 			   ($('#r-' + index).val()));
-    if (hours) {
-      hours += HOURS_STORAGE_DLM;
-    }
-    console.log(_hours.arrive);
-    console.log(_hours.leave);
-    console.log();
-    hours += JSON.stringify(_hours);
+    /* if (hours) {
+     *   hours += HOURS_STORAGE_DLM;
+     * }
+     */
+    
+    //    hours += JSON.stringify(_hours);
+    hours.push(JSON.stringify(_hours));
     
     if (_hours.hoursType) {
       talent += moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true);
@@ -461,13 +456,20 @@ function save() {
 			  ($('#edit-activities').val()),
 			  ($('#edit-vacation').val()),
 			  ($('#edit-sick').val()),
-			  talent,
-			  hours,
+			  JSON.stringify(hours),
 			  regular);
   
   localStorage.setItem(currentDate, JSON.stringify(record));
 
   let status = '';
+
+  let foo = JSON.parse(localStorage.getItem(currentDate));
+  let fooHours = JSON.parse(foo.hours);
+  console.log(fooHours);
+
+  fooHours.forEach(function(value) {
+    console.log(JSON.parse(value));
+  });
   
   // Generate message for modal depending on whether or not information saved
   if (localStorage.getItem(currentDate)) {
