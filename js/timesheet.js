@@ -14,13 +14,15 @@ let name;
 let hoursPerDay;
 let hourStep;
 
-function Record(holiday, activities, vacation, sick, hours, regular) {
+function Record(holiday, activities, vacation, sick, hours, regular, talent, hoursWorked) {
   this.holiday = holiday;
   this.activities = activities;
   this.vacation = vacation;
   this.sick = sick;
   this.hours = hours;
   this.regular = regular;
+  this.talent = talent; // Total talent hours, regardless of rate
+  this.hoursWorked = hoursWorked;  // Ranges of times worked
 
   let total = '';
 
@@ -41,6 +43,11 @@ function Record(holiday, activities, vacation, sick, hours, regular) {
   if (sick) {
     if (total) { total += ' + ';}
     total += sick + 'S';
+  }
+
+  if (talent) {
+    if (total) { total += ' + ';}
+    total += talent + 'T';
   }
 
   this.total = total;
@@ -426,18 +433,14 @@ function save() {
   let regular = 0;
   let talent = 0;
   let hours = [];
+  let hoursWorked = '';
 
   $('.times').each(function(index) {
     let _hours = new Hours(($('#ht-' + index).is(':checked')),
 			   ($('#a-' + index).datetimepicker('date').format('LT')),
 			   ($('#l-' + index).datetimepicker('date').format('LT')),
 			   ($('#r-' + index).val()));
-    /* if (hours) {
-     *   hours += HOURS_STORAGE_DLM;
-     * }
-     */
-    
-    //    hours += JSON.stringify(_hours);
+
     hours.push(JSON.stringify(_hours));
     
     if (_hours.hoursType) {
@@ -446,10 +449,11 @@ function save() {
     else {
       regular += moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true);
     }
-    
-    //    if (times) { times += ', '; }
-    // times += arrive.format('LT') + '-' + leave.format('LT');
-    // regular += leave.diff(arrive, 'hours', true);
+
+    if (hoursWorked) {
+      hoursWorked += ', ';
+    }
+    hoursWorked += _hours.arrive + ' - ' + _hours.leave;
   });
 
   let record = new Record((($('#edit-holiday').prop('checked')) ? hoursPerDay : 0),
@@ -457,7 +461,9 @@ function save() {
 			  ($('#edit-vacation').val()),
 			  ($('#edit-sick').val()),
 			  JSON.stringify(hours),
-			  regular);
+			  regular,
+			  talent,
+			  hoursWorked);
   
   localStorage.setItem(currentDate, JSON.stringify(record));
 
@@ -649,12 +655,12 @@ function print() {
     let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
 
     if (record) {
-      if (record.regular) {
-	hoursWorked = record.times;
-	weeklyHours += record.regular;
-	regular += record.regular;
+      if (hoursWorked) {
+	hoursWorked += ', ';
       }
-
+      hoursWorked += record.hoursWorked;
+      weeklyHours += record.regular;
+      regular += record.regular;
       hours = record.total;
       holiday += Number(record.holiday);
       talent += record.talent;
