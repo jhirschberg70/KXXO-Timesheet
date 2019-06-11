@@ -453,7 +453,7 @@ function save() {
     if (hoursWorked) {
       hoursWorked += ', ';
     }
-    hoursWorked += _hours.arrive + ' - ' + _hours.leave;
+    hoursWorked += _hours.arrive + '-' + _hours.leave;
   });
 
   let record = new Record((($('#edit-holiday').prop('checked')) ? hoursPerDay : 0),
@@ -463,7 +463,7 @@ function save() {
 			  JSON.stringify(hours),
 			  regular,
 			  talent,
-			  hoursWorked);
+			  formatHoursWorked(hoursWorked));
   
   localStorage.setItem(currentDate, JSON.stringify(record));
 
@@ -695,7 +695,7 @@ function print() {
       hoursSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
 
-    if (hoursWorked.length > 9) {
+    if (hoursWorked.length > 20) {
       hoursWorkedSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
     
@@ -789,6 +789,17 @@ function saveSettings() {
 }
 
 function saveSettingsCheck() {
+}
+
+function formatHoursWorked(hoursWorked) {
+  // Remove :, remove 00, convert AM to a and PM to p
+  let _hoursWorked = hoursWorked;
+  _hoursWorked = _hoursWorked.replace(/:/g, '');
+  _hoursWorked = _hoursWorked.replace(/00/g, '');
+  _hoursWorked = _hoursWorked.replace(/ AM/g, 'a');
+  _hoursWorked = _hoursWorked.replace(/ PM/g, 'p');
+
+  return _hoursWorked;
 }
 
 $(function() {
