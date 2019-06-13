@@ -23,34 +23,7 @@ function Record(holiday, activities, vacation, sick, hours, regular, talent, hou
   this.regular = regular;
   this.talent = talent; // Total talent hours, regardless of rate
   this.hoursWorked = hoursWorked;  // Ranges of times worked
-
-  let total = '';
-
-  if (regular) {
-    total += regular;
-  }
-
-  if (holiday) {
-    if (total) { total += ' + ';}
-    total += holiday + 'H';
-  }
-
-  if (vacation) {
-    if (total) { total += ' + ';}
-    total += vacation + 'V';
-  }
-
-  if (sick) {
-    if (total) { total += ' + ';}
-    total += sick + 'S';
-  }
-
-  if (talent) {
-    if (total) { total += ' + ';}
-    total += talent + 'T';
-  }
-
-  this.total = total;
+  this.total = regular + holiday + vacation + sick + talent;
 }
 
 function Hours(hoursType, arrive, leave, rate) {
