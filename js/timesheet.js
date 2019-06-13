@@ -258,7 +258,7 @@ function initDueDate() {
     dueDate = moment().date(endOfPeriod).subtract(2, 'days');
   }
   else if (moment().date(endOfPeriod).day() === 6) {
-    dueDate = moment().date(endOfPeriod).subtract(2, 'days');
+    dueDate = moment().date(endOfPeriod).subtract(1, 'days');
   }
   else {
     dueDate = moment().date(endOfPeriod);
@@ -668,7 +668,7 @@ function print() {
       hoursSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
 
-    if (hoursWorked.length > 20) {
+    if (hoursWorked.length > 16) {
       hoursWorkedSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
     
