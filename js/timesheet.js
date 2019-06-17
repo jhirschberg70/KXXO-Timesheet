@@ -21,9 +21,15 @@ function Record(holiday, activities, vacation, sick, hours, regular, talent, hou
   this.sick = sick;
   this.hours = hours;
   this.regular = regular;
-  this.talent = talent; // Total talent hours, regardless of rate
+  this.talent = talent; // Array of arrays from map with rate as key and hours as value
   this.hoursWorked = hoursWorked;  // Ranges of times worked
-  this.total = regular + holiday + vacation + sick + talent;
+
+  if (holiday) {
+    this.total = holiday;
+  }
+  else {
+    this.total = regular + vacation + sick;
+  }
 }
 
 function Hours(hoursType, arrive, leave, rate) {
@@ -404,9 +410,12 @@ function save() {
      $('#r-x').prop('disabled');
    */
   let regular = 0;
-  let talent = 0;
   let hours = [];
   let hoursWorked = '';
+
+  // For talent, use rate as a key in a Map and accumulate hours for each rate.  This allows
+  // for multiple talent rates on the same day.  Each rate is fixed to two places after the decimal
+  let talent = new Map();
 
   $('.times').each(function(index) {
     let _hours = new Hours(($('#ht-' + index).is(':checked')),
@@ -417,7 +426,15 @@ function save() {
     hours.push(JSON.stringify(_hours));
     
     if (_hours.hoursType) {
-      talent += moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true);
+      let _rate = Number(_hours.rate).toFixed(2);
+      _rateHours = talent.get(_rate);
+      
+      if (_rateHours) {
+	talent.set(_rate, Number(Number(_rateHours) + Number(moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true))).toFixed(2));
+      }
+      else {
+	talent.set(_rate, Number(moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true)).toFixed(2));
+      }
     }
     else {
       regular += moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true);
@@ -435,7 +452,7 @@ function save() {
 			  ($('#edit-sick').val()),
 			  JSON.stringify(hours),
 			  regular,
-			  talent,
+			  JSON.stringify(Array.from(talent)),
 			  formatHoursWorked(hoursWorked));
   
   localStorage.setItem(currentDate, JSON.stringify(record));
@@ -578,8 +595,8 @@ function removeTimes(instance = '') {
 
 function print() {
   // Determine date range of pay period and read info for that date range
-  // If current date is <= 15, then pay period is 1st through 15th.
-  // Otherwise, it's 16th through the end of the month.
+  // If current date is <= 15, then pay period is the 1st through 15th.
+  // Otherwise, it's the 16th through the end of the month.
   
   let year = moment().year();
   let month = ('0' + (moment().month() + 1)).slice(-2);
@@ -599,9 +616,9 @@ function print() {
   let regular = 0; // Total regular hours worked in pay period
   let vacation = 0;
   let holiday = 0;
-  let talent = 0;
+  let talent = new Map();
   let sick = 0;
-  let weeklyHours = 0;
+  let weeklyHours = 0; // Total regular hours in a given week
   let table = '';
   let overtime = 0;
   let prevPeriodHours = 0;  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
@@ -623,7 +640,7 @@ function print() {
   while (date.isSameOrBefore(endDate, 'day')) {
     
     let hoursWorked = ''; // Range of times worked
-    let hours = '';       // Total regular hours for day
+    let total = '';       // Total regular hours for the day (holiday/regular + vacation + sick)
     let activities = '';
     let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
 
@@ -634,12 +651,14 @@ function print() {
       hoursWorked += record.hoursWorked;
       weeklyHours += record.regular;
       regular += record.regular;
-      hours = record.total;
+      total = record.total;
       holiday += Number(record.holiday);
-      talent += record.talent;
+      talent += JSON.parse(record.talent);
       vacation += Number(record.vacation);
       sick += Number(record.sick);
       activities = record.activities;
+
+      console.log(talent);
     }
 
     let rowClass = '';
@@ -660,19 +679,14 @@ function print() {
       prevPeriodHours = 0; // Reset hours worked in previous pay period that affect first week of this period
     }
 
-    // Determine if we need to use a smaller font for either hoursWorked or hours
-    let hoursSize = '';
+    // Determine if we need to use a smaller font for hoursWorked
     let hoursWorkedSize = '';
     
-    if (hours.length > 9) {
-      hoursSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
-    }
-
     if (hoursWorked.length > 20) {
       hoursWorkedSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
     
-    table += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + hoursWorkedSize +'>' + hoursWorked + '</td><td' + hoursSize + '>' + hours + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
+    table += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + hoursWorkedSize +'>' + hoursWorked + '</td><td>' + total + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
 
     date.add(1, 'day');
   }
