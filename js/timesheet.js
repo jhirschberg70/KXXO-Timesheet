@@ -459,14 +459,6 @@ function save() {
 
   let status = '';
 
-  let foo = JSON.parse(localStorage.getItem(currentDate));
-  let fooHours = JSON.parse(foo.hours);
-  console.log(fooHours);
-
-  fooHours.forEach(function(value) {
-    console.log(JSON.parse(value));
-  });
-  
   // Generate message for modal depending on whether or not information saved
   if (localStorage.getItem(currentDate)) {
     status = 'Record saved';
@@ -653,7 +645,7 @@ function print() {
       regular += record.regular;
       total = record.total;
       holiday += Number(record.holiday);
-      talent += JSON.parse(record.talent);
+      talent = processTalentRates(JSON.parse(record.talent));
       vacation += Number(record.vacation);
       sick += Number(record.sick);
       activities = record.activities;
@@ -764,6 +756,9 @@ function updateStatus(msg) {
 
 function statusDismiss() {
   $('#status').fadeOut(400);
+}
+
+function processTalentRates(hours) {
 }
 
 function saveSettings() {
