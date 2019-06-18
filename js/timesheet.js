@@ -589,21 +589,8 @@ function print() {
   // Determine date range of pay period and read info for that date range
   // If current date is <= 15, then pay period is the 1st through 15th.
   // Otherwise, it's the 16th through the end of the month.
-  
-  let year = moment().year();
-  let month = ('0' + (moment().month() + 1)).slice(-2);
-  let startDate;
-  let endDate;
 
-  if (moment().date() <= 15) {
-    startDate = moment(year + '-' + month + '-01');
-    endDate = moment(year + '-' + month + '-15');
-  }
-  else {
-    startDate = moment(year + '-' + month + '-16');
-    endDate = moment(year + '-' + month + '-' + moment().endOf('month').date());
-  }
-
+  let [startDate, endDate] = calcPayPeriod();
   let date = moment(startDate);
   let regular = 0; // Total regular hours worked in pay period
   let vacation = 0;
@@ -613,20 +600,7 @@ function print() {
   let weeklyHours = 0; // Total regular hours in a given week
   let table = '';
   let overtime = 0;
-  let prevPeriodHours = 0;  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
-
-  // Determine the date of the previous Monday
-  let prevPayDay = moment(startDate).day(1);
-
-  // Collect up all the regular hours from prevMonday until startDate
-  while (prevPayDay.isBefore(startDate, 'day')) {
-    let record = JSON.parse(localStorage.getItem(prevPayDay.format('YYYY-MM-DD')));
-
-    if (record) {
-      prevPeriodHours += record.regular;
-    }
-    prevPayDay.add(1, 'day');
-  }
+  let prevPeriodHours = calcPrevPeriodHours(startDate);  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
 
   // Iterate over all dates in the pay period
   while (date.isSameOrBefore(endDate, 'day')) {
@@ -788,3 +762,31 @@ $(function() {
   init();
   view($('#set-date').datetimepicker('date'));
 });
+
+// Utility functions
+function calcPayPeriod() {
+  let year = moment().year();
+  let month = ('0' + (moment().month() + 1)).slice(-2);
+
+  if (moment().date() <= 15) {
+    return [moment(year + '-' + month + '-01'), moment(year + '-' + month + '-15')];
+  }
+  else {
+    return [moment(year + '-' + month + '-16'), moment(year + '-' + month + '-' + moment().endOf('month').date())];
+  }
+}
+
+function calcPrevPeriodHours(startDate) {
+  // Determine the date of the previous Monday
+  let prevPayDay = moment(startDate).day(1);
+
+  // Collect up all the regular hours from prevMonday until startDate
+  while (prevPayDay.isBefore(startDate, 'day')) {
+    let record = JSON.parse(localStorage.getItem(prevPayDay.format('YYYY-MM-DD')));
+
+    if (record) {
+      prevPeriodHours += record.regular;
+    }
+    prevPayDay.add(1, 'day');
+  }
+}
