@@ -600,6 +600,7 @@ function print() {
   let weeklyHours = 0; // Total regular hours in a given week
   let table = '';
   let overtime = 0;
+  let notes = 0; // Number of notes, notes are added whenever vacation, sick leave or talent hours occur for a given day.  Each day gets its own note.
   let prevPeriodHours = calcPrevPeriodHours(startDate);  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
 
   // Iterate over all dates in the pay period
@@ -609,6 +610,7 @@ function print() {
     let total = '';       // Total regular hours for the day (holiday/regular + vacation + sick)
     let activities = '';
     let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
+    let notesHtml = '';
 
     if (record) {
       if (hoursWorked) {
@@ -619,12 +621,15 @@ function print() {
       regular += record.regular;
       total = record.total;
       holiday += Number(record.holiday);
-      talent = processTalentRates(JSON.parse(record.talent));
+      talent = processTalentRates(talent, JSON.parse(record.talent));
       vacation += Number(record.vacation);
       sick += Number(record.sick);
       activities = record.activities;
+    }
 
-      console.log(talent);
+    // Generate notes
+    if (talent || vacation || sick) {
+      notesHtml = processNotes(++notes, talent, vacation, sick)
     }
 
     let rowClass = '';
@@ -732,8 +737,25 @@ function statusDismiss() {
   $('#status').fadeOut(400);
 }
 
-function processTalentRates(hours) {
+function processTalentRates(totalTalent, hours) {
+  hours.forEach(function(value) {
+    if (totalTalent.get(value[0])) {
+      totalTalent.set(value[0], (Number(totalTalent.get(value[0])) + Number(value[1])).toFixed(2));
+    } else {
+      totalTalent.set(value[0], Number(value[1]).toFixed(2));
+    }
+  });
+
+  return totalTalent;
 }
+
+function processNotes(notes, talent, vacation, sick) {
+  let noteHtml = '\<sup\>' + notes + '\<\/sup\>';
+  
+  for (let [key, value] of talent.entries()) {
+  }
+}
+    
 
 function saveSettings() {
   name = $('#settings-name').val();
