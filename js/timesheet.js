@@ -8,6 +8,7 @@ const STORAGE_DLM = '\u0000';
 const HOURS_STORAGE_DLM = '\u0001';
 const STATUS_TIMEOUT = 5000;
 const UNDONE_TIMEOUT = 1250;
+const HOURS_PER_WORK_WEEK = 40;
 
 let currentDate;
 let dueDate;
@@ -565,7 +566,7 @@ function print() {
   let table = '';
   let overtime = 0;
   let notes = 0; // Number of notes, notes are added whenever vacation, sick leave or talent hours occur for a given day.  Each day gets its own note.
-  let previousRegularHours = getPreviousRegularHours(startDate);  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
+  let previousHours = getPreviousHours(startDate);  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
 
   // Iterate over all dates in the pay period
   while (date.isSameOrBefore(endDate, 'day')) {
@@ -580,8 +581,8 @@ function print() {
 	hoursWorked += ', ';
       }
       hoursWorked += record.hoursWorked;
-      weeklyHours += getRegularHours(JSON.parse(record.times));
-      regularHours += getRegularHours(JSON.parse(record.times));
+      weeklyHours += getHours(JSON.parse(record.times));
+      regularHours += getHours(JSON.parse(record.times));
       total = record.total;
       holiday += Number(record.holiday);
       //      talent = processTalentRates(talent, JSON.parse(record.talent));
@@ -603,14 +604,26 @@ function print() {
     }
 
     // If it's a Sunday, determine overtime for the week
+    // Overtime cases:  Hours during previous pay period already went over 40.  Those overtime hours would've already been paid.
+    // Previous hours + current hours are > 40, so difference is overtime
     if ((date.day()) === 0) {
-      if (weeklyHours + previousRegularHours > 40) {
-	overtime += (weeklyHours + previousRegularHours - 40);
-	regularHours -= (weeklyHours + previousRegularHours - 40);
-	if (regularHours < 0) {regularHours = 0;}
+      if ((previousHours + weeklyHours) > HOURS_PER_WORK_WEEK) {
+	if (previousHours > HOURS_PER_WORK_WEEK) {
+	  overtime += weeklyHours;
+	}
+	else {
+	  overtime += (weeklyHours + previousHours - HOURS_PER_WORK_WEEK);
+	}
       }
+
+      /* if (weeklyHours + previousHours > HOURS_PER_WEEK) {
+	 overtime += (weeklyHours + previousHours - HOURS_PER_WORK_WEEK);
+	 regularHours -= (weeklyHours + previousHours - HOURS_PER_WORK_WEEK);
+	 if (regularHours < 0) {regularHours = 0;}
+       * }*/
       weeklyHours = 0;  // Reset weekly hours on Sunday
-      previousRegularHours = 0; // Reset hours worked in previous pay period that affect first week of this period
+      previousHours = 0; // Reset hours worked in previous pay period that affect first week of this period
+      console.log(overtime);
     }
 
     // Determine if we need to use a smaller font for hoursWorked
@@ -748,37 +761,30 @@ function getPayPeriod() {
   }
 }
 
-function getPreviousRegularHours(startDate) {
+function getPreviousHours(startDate) {
   // Determine the date of the previous Monday
   let previousDay = startDate.day() ? moment(startDate).subtract((startDate.day() - (startDate.day() - 1)), 'days') : moment(startDate).subtract(6, 'days');
-  let previousRegularHours = 0;
+  let previousHours = 0;
 
-  // Collect up all the regular hours from Monday of the previous pay period until startDate
+  // Collect up all the hours from Monday of the previous pay period until startDate
   while (previousDay.isBefore(startDate)) {
     let record = JSON.parse(localStorage.getItem(previousDay.format('YYYY-MM-DD')));
 
     if (record) {
-      previousRegularHours += getRegularHours(JSON.parse(record.times));
+      previousHours += getHours(JSON.parse(record.times));
     }
     previousDay.add(1, 'day');
   }
-  return previousRegularHours;
+  return previousHours;
 }
 
-function getRegularHours(times) {
-  let regularHours = 0;
-  
+function getHours(times) {
+  let hours = 0;
+
   times.forEach(function(value, index) {
     let _times = JSON.parse(value);
-    
-    $('#a-' + index).datetimepicker('date', _times.arrive);
-    $('#l-' + index).datetimepicker('date', _times.leave);
-    $('#r-' + index).val(_times.rate);
-
-    if (!(_times.hoursType)) {
-      regularHours += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));;
-    }
+    hours += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));;
   });
 
-  return regularHours;
+  return hours;
 }
