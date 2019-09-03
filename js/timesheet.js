@@ -1,7 +1,9 @@
+// Undo cases:  deleted record, saving record with no previous record saved, saving record with previous record saved
+
 const DEFAULT_TIME_DUE = '8:00 AM';
 const DEFAULT_HOURS_PER_DAY = 8.00;
-const DEFAULT_HOUR_STEP = 0.0833;
-const DEFAULT_TIME_STEP = 5;
+const DEFAULT_HOUR_STEP = 0.25;
+const DEFAULT_TIME_STEP = 15;
 const STORAGE_DLM = '\u0000';
 const HOURS_STORAGE_DLM = '\u0001';
 const STATUS_TIMEOUT = 5000;
@@ -14,25 +16,15 @@ let name;
 let hoursPerDay;
 let hourStep;
 
-function Record(holiday, activities, vacation, sick, hours, regular, talent, hoursWorked) {
+function Record(holiday, activities, vacation, sick, times) {
   this.holiday = holiday;
   this.activities = activities;
   this.vacation = vacation;
   this.sick = sick;
-  this.hours = hours;
-  this.regular = regular;
-  this.talent = talent; // Array of arrays from map with rate as key and hours as value
-  this.hoursWorked = hoursWorked;  // Ranges of times worked
-
-  if (holiday) {
-    this.total = holiday;
-  }
-  else {
-    this.total = regular + vacation + sick;
-  }
+  this.times = times;
 }
 
-function Hours(hoursType, arrive, leave, rate) {
+function Times(hoursType, arrive, leave, rate) {
   this.hoursType = hoursType;
   this.arrive = arrive;
   this.leave = leave;
@@ -56,7 +48,6 @@ function editCheck(event) {
 
   // Default to saving and deleting record being disabled
   $('#edit-save').prop('disabled', true).addClass('btn-disabled');
-  $('#edit-delete').prop('disabled', true).addClass('btn-disabled');
 
   if (target === 'edit-holiday') {
     if ($(this).is(':checked')) {
@@ -64,7 +55,6 @@ function editCheck(event) {
       $('.btn-hours').addClass('btn-disabled');
       $('#holiday-status').html('Yes');
       $('#edit-save').prop('disabled', false).removeClass('btn-disabled');
-      $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
       if ($('.times').length) { removeTimes(); }
     }
     else {
@@ -133,7 +123,6 @@ function editCheck(event) {
 	(vacationValid && !hoursValid()) ||
 	(sickValid && !hoursValid())) {
       $('#edit-save').prop('disabled', false).removeClass('btn-disabled');
-      $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
       $('#edit-holiday').prop('disabled', true);
     }
     else {
@@ -169,8 +158,8 @@ function hoursValid() {
       hoursValid = false;
     }
 
-    // If arrive is the same as or before previous leave, times are invalid
-    if (arrive.isSameOrBefore(prevLeave)) {
+    // If arrive is before previous leave, times are invalid
+    if (arrive.isBefore(prevLeave)) {
       $('#a-time-' + time).addClass('invalid');
       $('#l-time-' + (time - 1)).addClass('invalid');
       hoursValid = false;
@@ -197,8 +186,13 @@ function init() {
   initSettings();
   initSelects();
   initSetDate();
-  initDueDate();
+  initDueDate();  
   initHandlers();
+}
+
+function initDueDate() {
+  let dueDate = getDueDate();
+  $('#due-date').prepend('Timesheet Due:  ' + dueDate.format('dddd, MMMM Do h:mm A'));
 }
 
 function initSettings() {
@@ -244,11 +238,10 @@ function initSetDate() {
 
   $('#set-date').on('change.datetimepicker', function(event) {
     view($('#set-date').datetimepicker('date'));
-    //    editCheck(event);
   });
 }
 
-function initDueDate() {
+function getDueDate() {
   // Determine due date
   // If end of period is Sunday, subtract two days to get due date
   // If end of period is Saturday, subtract one day to get due date
@@ -274,7 +267,7 @@ function initDueDate() {
   dueDate.hour(8);
   dueDate.minute(0);
 
-  $('#due-date').prepend('Timesheet Due:  ' + dueDate.format('dddd, MMMM Do h:mm A'));
+  return dueDate;
 }
 
 function initHandlers() {
@@ -284,7 +277,7 @@ function initHandlers() {
   $('#edit-holiday').change(editCheck);
   $('.edit-select').change(editCheck);
   $('#edit-save').click(save);
-  $('#edit-delete').click(editCheck);
+  $('#edit-delete').click(deleteRecord);
   $('#print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
@@ -314,6 +307,7 @@ function view(date) {
   clear();
   
   if (record) {
+    $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
     $('#edit-activities').val(record.activities);
     $('#edit-vacation').val(record.vacation);
     $('#edit-sick').val(record.sick);
@@ -330,18 +324,18 @@ function view(date) {
       $('#edit-sick').change();
     }
 
-    if (record.hours) {
-      let hours = JSON.parse(record.hours);
+    if (record.times) {
+      let times = JSON.parse(record.times);
 
-      hours.forEach(function(value, index) {
+      times.forEach(function(value, index) {
 	$('#add').trigger('click');
-	let _hours = JSON.parse(value);
+	let _times = JSON.parse(value);
 	
-	$('#a-' + index).datetimepicker('date', _hours.arrive);
-	$('#l-' + index).datetimepicker('date', _hours.leave);
-	$('#r-' + index).val(_hours.rate);
+	$('#a-' + index).datetimepicker('date', _times.arrive);
+	$('#l-' + index).datetimepicker('date', _times.leave);
+	$('#r-' + index).val(_times.rate);
 
-	if (_hours.hoursType) {
+	if (_times.hoursType) {
 	  $('#ht-' + index).trigger('click');
 	}
 	else {
@@ -397,78 +391,48 @@ function settings() {
 }
 
 function save() {
-  /*
-     Items to save
-     $('#edit-holiday').prop('checked');
-     $('#edit-activities').val();
-     $('#edit-vacation').val();
-     $('#edit-sick').val();
-     $('#ht-x').prop('checked');
-     $('#a-x').datetimepicker('date');
-     $('#l-x').datetimepicker('date');
-     $('#r-x').val();
-     $('#r-x').prop('disabled');
-   */
-  let regular = 0;
-  let hours = [];
-  let hoursWorked = '';
+  // If no record exists, undoData should be set to new
+  // If a record already exists, undoData should be set to that record
+  undoData = new Undo('new', '');
 
-  // For talent, use rate as a key in a Map and accumulate hours for each rate.  This allows
-  // for multiple talent rates on the same day.  Each rate is fixed to two places after the decimal
-  let talent = new Map();
+  let previousRecord = JSON.parse(localStorage.getItem(currentDate));
+
+  if (previousRecord) {
+    undoData = new Undo('edit', previousRecord);
+  }
+
+  let times = [];
 
   $('.times').each(function(index) {
-    let _hours = new Hours(($('#ht-' + index).is(':checked')),
+    let _times = new Times(($('#ht-' + index).is(':checked')),
 			   ($('#a-' + index).datetimepicker('date').format('LT')),
 			   ($('#l-' + index).datetimepicker('date').format('LT')),
 			   ($('#r-' + index).val()));
 
-    hours.push(JSON.stringify(_hours));
-    
-    if (_hours.hoursType) {
-      let _rate = Number(_hours.rate).toFixed(2);
-      _rateHours = talent.get(_rate);
-      
-      if (_rateHours) {
-	talent.set(_rate, Number(Number(_rateHours) + Number(moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true))).toFixed(2));
-      }
-      else {
-	talent.set(_rate, Number(moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true)).toFixed(2));
-      }
-    }
-    else {
-      regular += moment(_hours.leave, 'LT').diff(moment(_hours.arrive, 'LT'), 'hours', true);
-    }
-
-    if (hoursWorked) {
-      hoursWorked += ', ';
-    }
-    hoursWorked += _hours.arrive + '-' + _hours.leave;
+    times.push(JSON.stringify(_times));
   });
 
   let record = new Record((($('#edit-holiday').prop('checked')) ? hoursPerDay : 0),
 			  ($('#edit-activities').val()),
 			  ($('#edit-vacation').val()),
 			  ($('#edit-sick').val()),
-			  JSON.stringify(hours),
-			  regular,
-			  JSON.stringify(Array.from(talent)),
-			  formatHoursWorked(hoursWorked));
+			  JSON.stringify(times));
   
   localStorage.setItem(currentDate, JSON.stringify(record));
 
   let status = '';
 
   // Generate message for modal depending on whether or not information saved
+  // Also make deleting record possible
   if (localStorage.getItem(currentDate)) {
     status = 'Record saved';
+    $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
   }
   else {
     status = 'Save record failed';
   }
 
   updateStatus(status);
-  //  view(currentDate);
 }
 
 function addTimes() {
@@ -529,9 +493,6 @@ function addTimes() {
   html += '<div class=\"input-group-text\">$</div>';
   html += '</div>';
   html += '<input type=\"text\" id=\"' + rateID + '\" class=\"form-control rate\" disabled>';
-  html += '<div class=\"input-group-append\">';
-  html += '<div class=\"input-group-text\">/hr</div>';
-  html += '</div>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
@@ -586,26 +547,28 @@ function removeTimes(instance = '') {
 }
 
 function print() {
+  // Set due date
+  initDueDate();
+    
   // Determine date range of pay period and read info for that date range
   // If current date is <= 15, then pay period is the 1st through 15th.
   // Otherwise, it's the 16th through the end of the month.
 
-  let [startDate, endDate] = calcPayPeriod();
+  let [startDate, endDate] = getPayPeriod();
   let date = moment(startDate);
-  let regular = 0; // Total regular hours worked in pay period
+  let regularHours = 0; // Total regular hours worked in pay period
   let vacation = 0;
   let holiday = 0;
-  let talent = new Map();
+  let talent = '';
   let sick = 0;
   let weeklyHours = 0; // Total regular hours in a given week
   let table = '';
   let overtime = 0;
   let notes = 0; // Number of notes, notes are added whenever vacation, sick leave or talent hours occur for a given day.  Each day gets its own note.
-  let prevPeriodHours = calcPrevPeriodHours(startDate);  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
+  let previousRegularHours = getPreviousRegularHours(startDate);  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
 
   // Iterate over all dates in the pay period
   while (date.isSameOrBefore(endDate, 'day')) {
-    
     let hoursWorked = ''; // Range of times worked
     let total = '';       // Total regular hours for the day (holiday/regular + vacation + sick)
     let activities = '';
@@ -617,11 +580,11 @@ function print() {
 	hoursWorked += ', ';
       }
       hoursWorked += record.hoursWorked;
-      weeklyHours += record.regular;
-      regular += record.regular;
+      weeklyHours += getRegularHours(JSON.parse(record.times));
+      regularHours += getRegularHours(JSON.parse(record.times));
       total = record.total;
       holiday += Number(record.holiday);
-      talent = processTalentRates(talent, JSON.parse(record.talent));
+      //      talent = processTalentRates(talent, JSON.parse(record.talent));
       vacation += Number(record.vacation);
       sick += Number(record.sick);
       activities = record.activities;
@@ -641,13 +604,13 @@ function print() {
 
     // If it's a Sunday, determine overtime for the week
     if ((date.day()) === 0) {
-      if (weeklyHours + prevPeriodHours > 40) {
-	overtime += (weeklyHours + prevPeriodHours - 40);
-	regular -= (weeklyHours + prevPeriodHours - 40);
-	if (regular < 0) {regular = 0;}
+      if (weeklyHours + previousRegularHours > 40) {
+	overtime += (weeklyHours + previousRegularHours - 40);
+	regularHours -= (weeklyHours + previousRegularHours - 40);
+	if (regularHours < 0) {regularHours = 0;}
       }
       weeklyHours = 0;  // Reset weekly hours on Sunday
-      prevPeriodHours = 0; // Reset hours worked in previous pay period that affect first week of this period
+      previousRegularHours = 0; // Reset hours worked in previous pay period that affect first week of this period
     }
 
     // Determine if we need to use a smaller font for hoursWorked
@@ -658,7 +621,6 @@ function print() {
     }
     
     table += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + hoursWorkedSize +'>' + hoursWorked + '</td><td>' + total + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
-
     date.add(1, 'day');
   }
 
@@ -674,8 +636,8 @@ function print() {
     let formattedDueDate = dueDate.format('dddd, MMMM Do') + '<br>' + dueDate.format('h:mm A');
     let totalHoursPaid = '';
 
-    if (Number(regular + holiday + vacation + sick)) {
-      totalHoursPaid = (Number(regular + holiday + vacation + sick)).toFixed(2);
+    if (Number(regularHours + holiday + vacation + sick)) {
+      totalHoursPaid = (Number(regularHours + holiday + vacation + sick)).toFixed(2);
     }
 
     if (overtime) {
@@ -700,7 +662,7 @@ function print() {
     $(printWindow.document).contents().find('#dates').html(startDate.format('M/D/YY') + ' - ' + endDate.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(table);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
-    $(printWindow.document).contents().find('#total-hours-worked').html(regular ? Number(regular).toFixed(2) : '');
+    $(printWindow.document).contents().find('#total-hours-worked').html(regularHours ? Number(regularHours).toFixed(2) : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
     $(printWindow.document).contents().find('#vacation').html(vacation ? Number(vacation).toFixed(2) : '');
     $(printWindow.document).contents().find('#holiday').html(holiday ? Number(holiday).toFixed(2) : '');
@@ -719,14 +681,14 @@ function deleteRecord() {
 function updateStatus(msg) {
   if (msg === 'Undone') {
     $('#status-contents').fadeOut(200, function (event) {
-      $('#undo').addClass('hide');
+      $('#undo').hide();
       $('#status-msg').html(msg);
       $('#status-contents').fadeIn(200);
       setTimeout( () => {$('#status-dismiss').click();}, UNDONE_TIMEOUT);
     });
   }
   else {
-    $('#undo').removeClass('hide');
+    $('#undo').show();
     $('#status-msg').html(msg);
     $('#status').fadeIn(400);
     setTimeout( () => {$('#status-dismiss').click();}, STATUS_TIMEOUT);
@@ -737,25 +699,13 @@ function statusDismiss() {
   $('#status').fadeOut(400);
 }
 
-function processTalentRates(totalTalent, hours) {
-  hours.forEach(function(value) {
-    if (totalTalent.get(value[0])) {
-      totalTalent.set(value[0], (Number(totalTalent.get(value[0])) + Number(value[1])).toFixed(2));
-    } else {
-      totalTalent.set(value[0], Number(value[1]).toFixed(2));
-    }
-  });
-
-  return totalTalent;
-}
-
 function processNotes(notes, talent, vacation, sick) {
   let noteHtml = '\<sup\>' + notes + '\<\/sup\>';
   
   for (let [key, value] of talent.entries()) {
   }
 }
-    
+
 
 function saveSettings() {
   name = $('#settings-name').val();
@@ -786,7 +736,7 @@ $(function() {
 });
 
 // Utility functions
-function calcPayPeriod() {
+function getPayPeriod() {
   let year = moment().year();
   let month = ('0' + (moment().month() + 1)).slice(-2);
 
@@ -798,17 +748,37 @@ function calcPayPeriod() {
   }
 }
 
-function calcPrevPeriodHours(startDate) {
+function getPreviousRegularHours(startDate) {
   // Determine the date of the previous Monday
-  let prevPayDay = moment(startDate).day(1);
+  let previousDay = startDate.day() ? moment(startDate).subtract((startDate.day() - (startDate.day() - 1)), 'days') : moment(startDate).subtract(6, 'days');
+  let previousRegularHours = 0;
 
-  // Collect up all the regular hours from prevMonday until startDate
-  while (prevPayDay.isBefore(startDate, 'day')) {
-    let record = JSON.parse(localStorage.getItem(prevPayDay.format('YYYY-MM-DD')));
+  // Collect up all the regular hours from Monday of the previous pay period until startDate
+  while (previousDay.isBefore(startDate)) {
+    let record = JSON.parse(localStorage.getItem(previousDay.format('YYYY-MM-DD')));
 
     if (record) {
-      prevPeriodHours += record.regular;
+      previousRegularHours += getRegularHours(JSON.parse(record.times));
     }
-    prevPayDay.add(1, 'day');
+    previousDay.add(1, 'day');
   }
+  return previousRegularHours;
+}
+
+function getRegularHours(times) {
+  let regularHours = 0;
+  
+  times.forEach(function(value, index) {
+    let _times = JSON.parse(value);
+    
+    $('#a-' + index).datetimepicker('date', _times.arrive);
+    $('#l-' + index).datetimepicker('date', _times.leave);
+    $('#r-' + index).val(_times.rate);
+
+    if (!(_times.hoursType)) {
+      regularHours += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));;
+    }
+  });
+
+  return regularHours;
 }
