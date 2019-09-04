@@ -415,8 +415,8 @@ function save() {
 
   let record = new Record((($('#edit-holiday').prop('checked')) ? hoursPerDay : 0),
 			  ($('#edit-activities').val()),
-			  ($('#edit-vacation').val()),
-			  ($('#edit-sick').val()),
+			  (Number($('#edit-vacation').val())),
+			  (Number($('#edit-sick').val())),
 			  JSON.stringify(times));
   
   localStorage.setItem(currentDate, JSON.stringify(record));
@@ -556,46 +556,50 @@ function print() {
   // Otherwise, it's the 16th through the end of the month.
 
   let [startDate, endDate] = getPayPeriod();
-  let date = moment(startDate);
-  let regularHours = 0; // Total regular hours worked in pay period
+  let date = moment(startDate);  // Date being processed
   let vacation = 0;
   let holiday = 0;
-  let talent = '';
   let sick = 0;
-  let weeklyHours = 0; // Total regular hours in a given week
+  let regular = 0; // Total regular hours worked in the pay period
+  let talent = 0; // Total talent hours worked in the pay period
+  let rate = 0; // Total amount paid for all talent hours worked in the pay period
+  let weekly = 0; // Total hours worked in the week, both regular and talent
+
   let table = '';
   let overtime = 0;
   let notes = 0; // Number of notes, notes are added whenever vacation, sick leave or talent hours occur for a given day.  Each day gets its own note.
-  let previousHours = getPreviousHours(startDate);  // Hours worked in previous pay period that contribute to overtime for first week of this pay period
+  let previous = getPreviousHours(startDate);  // Hours worked in previous pay period that potentially contribute to overtime in this pay period
 
   // Iterate over all dates in the pay period
   while (date.isSameOrBefore(endDate, 'day')) {
-    let hoursWorked = ''; // Range of times worked
-    let total = '';       // Total regular hours for the day (holiday/regular + vacation + sick)
+    let total = '';  // Total of all hours 
     let activities = '';
-    let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
+    let dayparts = '';
     let notesHtml = '';
+    let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
 
+
+    // If there is a record for the day, get dayparts, regular, talent and talentRate
     if (record) {
-      if (hoursWorked) {
-	hoursWorked += ', ';
-      }
-      hoursWorked += record.hoursWorked;
-      weeklyHours += getHours(JSON.parse(record.times));
-      regularHours += getHours(JSON.parse(record.times));
-      total = record.total;
+      let [_dayparts, _regular, _talent, _rate] = processTimes(JSON.parse(record.times));
+      
       holiday += Number(record.holiday);
-      //      talent = processTalentRates(talent, JSON.parse(record.talent));
       vacation += Number(record.vacation);
       sick += Number(record.sick);
       activities = record.activities;
+      dayparts = _dayparts;
+      regular += _regular;
+      talent += _talent;
+      rate += _rate;
+      weekly += _regular + _talent;
+      total = Number(_regular + _talent + record.holiday + record.vacation + record.sick);
     }
 
     // Generate notes
-    if (talent || vacation || sick) {
-      notesHtml = processNotes(++notes, talent, vacation, sick)
-    }
-
+    /* if (talent || vacation || sick) {
+     *   notesHtml = processNotes(++notes, talent, vacation, sick)
+     * }
+     */
     let rowClass = '';
 
     // If it's a weekend, shade area on timesheet
@@ -607,12 +611,12 @@ function print() {
     // Overtime cases:  Hours during previous pay period already went over 40.  Those overtime hours would've already been paid.
     // Previous hours + current hours are > 40, so difference is overtime
     if ((date.day()) === 0) {
-      if ((previousHours + weeklyHours) > HOURS_PER_WORK_WEEK) {
-	if (previousHours > HOURS_PER_WORK_WEEK) {
-	  overtime += weeklyHours;
+      if ((previous + weekly) > HOURS_PER_WORK_WEEK) {
+	if (previous > HOURS_PER_WORK_WEEK) {
+	  overtime += weekly;
 	}
 	else {
-	  overtime += (weeklyHours + previousHours - HOURS_PER_WORK_WEEK);
+	  overtime += (weekly + previous - HOURS_PER_WORK_WEEK);
 	}
       }
 
@@ -621,19 +625,19 @@ function print() {
 	 regularHours -= (weeklyHours + previousHours - HOURS_PER_WORK_WEEK);
 	 if (regularHours < 0) {regularHours = 0;}
        * }*/
-      weeklyHours = 0;  // Reset weekly hours on Sunday
-      previousHours = 0; // Reset hours worked in previous pay period that affect first week of this period
+      weekly = 0;  // Reset weekly hours on Sunday
+      previous = 0; // Reset hours worked in previous pay period that affect first week of this period
       console.log(overtime);
     }
 
     // Determine if we need to use a smaller font for hoursWorked
-    let hoursWorkedSize = '';
+    let daypartsSize = '';
     
-    if (hoursWorked.length > 16) {
-      hoursWorkedSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
+    if (dayparts.length > 16) {
+      daypartsSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
     
-    table += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + hoursWorkedSize +'>' + hoursWorked + '</td><td>' + total + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
+    table += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + daypartsSize +'>' + dayparts + '</td><td>' + total + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
     date.add(1, 'day');
   }
 
@@ -649,8 +653,8 @@ function print() {
     let formattedDueDate = dueDate.format('dddd, MMMM Do') + '<br>' + dueDate.format('h:mm A');
     let totalHoursPaid = '';
 
-    if (Number(regularHours + holiday + vacation + sick)) {
-      totalHoursPaid = (Number(regularHours + holiday + vacation + sick)).toFixed(2);
+    if (Number(regular + holiday + vacation + sick)) {
+      totalHoursPaid = (Number(regular + holiday + vacation + sick)).toFixed(2);
     }
 
     if (overtime) {
@@ -675,7 +679,7 @@ function print() {
     $(printWindow.document).contents().find('#dates').html(startDate.format('M/D/YY') + ' - ' + endDate.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(table);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
-    $(printWindow.document).contents().find('#total-hours-worked').html(regularHours ? Number(regularHours).toFixed(2) : '');
+    $(printWindow.document).contents().find('#total-hours-worked').html(regular ? Number(regular).toFixed(2) : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
     $(printWindow.document).contents().find('#vacation').html(vacation ? Number(vacation).toFixed(2) : '');
     $(printWindow.document).contents().find('#holiday').html(holiday ? Number(holiday).toFixed(2) : '');
@@ -719,7 +723,6 @@ function processNotes(notes, talent, vacation, sick) {
   }
 }
 
-
 function saveSettings() {
   name = $('#settings-name').val();
   hoursPerDay = $('#settings-hours-per-day').val();
@@ -731,22 +734,6 @@ function saveSettings() {
 
 function saveSettingsCheck() {
 }
-
-function formatHoursWorked(hoursWorked) {
-  // Remove :, remove 00, convert AM to a and PM to p
-  let _hoursWorked = hoursWorked;
-  _hoursWorked = _hoursWorked.replace(/:/g, '');
-  _hoursWorked = _hoursWorked.replace(/00/g, '');
-  _hoursWorked = _hoursWorked.replace(/ AM/g, 'a');
-  _hoursWorked = _hoursWorked.replace(/ PM/g, 'p');
-
-  return _hoursWorked;
-}
-
-$(function() {
-  init();
-  view($('#set-date').datetimepicker('date'));
-});
 
 // Utility functions
 function getPayPeriod() {
@@ -771,20 +758,51 @@ function getPreviousHours(startDate) {
     let record = JSON.parse(localStorage.getItem(previousDay.format('YYYY-MM-DD')));
 
     if (record) {
-      previousHours += getHours(JSON.parse(record.times));
+      let [_dayparts, _regular, _talent, _rate] = processTimes(JSON.parse(record.times));
+      previousHours += _regular + _talent;
     }
     previousDay.add(1, 'day');
   }
   return previousHours;
 }
 
-function getHours(times) {
-  let hours = 0;
-
+function processTimes(times) {
+  let dayparts = '';
+  let regular = 0;
+  let talent = 0;
+  let rate = 0;
+  
   times.forEach(function(value, index) {
     let _times = JSON.parse(value);
-    hours += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));;
+
+    if (dayparts) {
+      dayparts += ', ';
+    }
+    dayparts += formatDayparts(_times.arrive, _times.leave);
+    if (_times.hoursType) {
+      talent += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));
+      rate += Number(_times.rate);
+    }
+    else {
+      regular += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));
+    }
   });
 
-  return hours;
+  return [dayparts, regular, talent, rate];
 }
+
+function formatDayparts(arrive, leave) {
+  let dayparts = arrive + '-' + leave;
+  // Remove :, remove 00, convert AM to a and PM to p
+  dayparts = dayparts.replace(/:/g, '');
+  dayparts = dayparts.replace(/00/g, '');
+  dayparts = dayparts.replace(/ AM/g, 'a');
+  dayparts = dayparts.replace(/ PM/g, 'p');
+
+  return dayparts;
+}
+
+$(function() {
+  init();
+  view($('#set-date').datetimepicker('date'));
+});
