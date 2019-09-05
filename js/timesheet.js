@@ -548,30 +548,41 @@ function removeTimes(instance = '') {
 }
 
 function print() {
-  // Set due date
   initDueDate();
-    
-  // Determine date range of pay period and read info for that date range
-  // If current date is <= 15, then pay period is the 1st through 15th.
-  // Otherwise, it's the 16th through the end of the month.
 
-  let [startDate, endDate] = getPayPeriod();
-  let date = moment(startDate);  // Date being processed
-  let vacation = 0;
+  /*
+     start: The first day of the pay period
+     end:   The last day of the pay period
+     date: Current date being processed
+     holiday: Total holiday hours used during pay period
+     vacation: Total vacation hours used during pay period
+     sick: Total sick leave taken during pay period
+     regular: Total non-talent hours worked during pay period
+     talent: Total talent hours worked during pay period (doesn't include talent fees)
+     rate: Total amount to be paid for talent hours during pay period (excludes talent fees)
+     weekly: Total regular and talent hours worked for a given week WITHIN the pay period
+     overtime: Total overtime hours to be paid during pay period
+     notes: Number of notes that have been generated during pay period.  Notes occur for vacation, sick and talent
+     previous:  Total regular and talent hours worked from Monday before start until start
+     row: HTML for table row for date
+   */
+  
+  let [start, end] = getPayPeriod();
+  let date = moment(start);  // Date being processed
   let holiday = 0;
+  let vacation = 0;
   let sick = 0;
-  let regular = 0; // Total regular hours worked in the pay period
-  let talent = 0; // Total talent hours worked in the pay period
-  let rate = 0; // Total amount paid for all talent hours worked in the pay period
-  let weekly = 0; // Total hours worked in the week, both regular and talent
-
-  let table = '';
+  let regular = 0;
+  let talent = 0;
+  let rate = 0;
+  let weekly = 0;
   let overtime = 0;
-  let notes = 0; // Number of notes, notes are added whenever vacation, sick leave or talent hours occur for a given day.  Each day gets its own note.
-  let previous = getPreviousHours(startDate);  // Hours worked in previous pay period that potentially contribute to overtime in this pay period
+  let notes = 0;
+  let previous = getPreviousHours(start);
+  let row = '';
 
   // Iterate over all dates in the pay period
-  while (date.isSameOrBefore(endDate, 'day')) {
+  while (date.isSameOrBefore(end, 'day')) {
     let total = '';  // Total of all hours 
     let activities = '';
     let dayparts = '';
@@ -579,7 +590,12 @@ function print() {
     let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
 
 
-    // If there is a record for the day, get dayparts, regular, talent and talentRate
+    /* If there is a record for the day, retrieve it.
+       _dayparts: The time ranges worked on a given day
+       _regular: The total number of regular hours worked for a given day
+       _talent: The total number of talent hours worked for a given day
+       _rate: The total amount to be paid for talent hours on a given day
+     */
     if (record) {
       let [_dayparts, _regular, _talent, _rate] = processTimes(JSON.parse(record.times));
       
@@ -595,6 +611,45 @@ function print() {
       total = Number(_regular + _talent + record.holiday + record.vacation + record.sick);
     }
 
+    /* If it's a Sunday, determine regular and overtime hours for the week.  The work week is considered Monday - Sunday, so
+       in cases where the current pay period starts on a day other than Monday, the hours worked from the last Monday of the
+       previous period until the start of the current period (previous) need to be taken into account for computing overtime.
+       The total number of hours worked in a week is always previous + weekly, though previous will only be > 0 during
+       the first week of the current pay perdiod.  Overtime occurs when weekly + previous is > HOURS_PER_WORK_WEEK.
+       If previous is >= HOURS_PER_WORK_WEEK, then overtime is just equal to weekly and the overtime (weekly) should be 
+       subtracted from regular.  Otherwise, overtime is equal to weekly + previous - HOURS_PER_WORK_WEEK, and this same
+       amount should be subtracted from regular.  Here are a couple examples:
+
+       previous = 48, weekly = 10, HOURS_PER_WORK_WEEK = 40:
+
+       Total hours worked in the week is 58, which means 18 hours of overtime need to be paid.  However, eight of those overtime
+       hours occurred during the previous pay period and have already been paid.  Only the 10 additional hours worked in this
+       pay period should be counted as overtime.
+
+       previous = 32, weekly = 12, HOURS_PER_WORK_WEEK = 40:
+       
+       Total hours worked in the week is 44.  Since previous was < HOURS_PER_WORK_WEEK, no overtime occurs until
+       previous + weekly exceeds HOURS_PER_WORK_WEEK.  In this case, that means the first eight hours of weekly
+       are just regular hours.  The remaiing four hours are overtime.
+     */
+    
+    if ((date.day()) === 0) {
+      if ((previous + weekly) > HOURS_PER_WORK_WEEK) {
+	if (previous >= HOURS_PER_WORK_WEEK) {
+	  overtime += weekly;
+	  regular -= weekly;
+	}
+	else {
+	  overtime += (weekly + previous - HOURS_PER_WORK_WEEK);
+	  regular -= (weekly + previous - HOURS_PER_WORK_WEEK);
+	}
+      }
+      regular = regular < 0 ? 0 : regular;
+      weekly = 0;
+      previous = 0;
+    }
+
+
     // Generate notes
     /* if (talent || vacation || sick) {
      *   notesHtml = processNotes(++notes, talent, vacation, sick)
@@ -607,37 +662,15 @@ function print() {
       rowClass = ' class=\"shaded\"';
     }
 
-    // If it's a Sunday, determine overtime for the week
-    // Overtime cases:  Hours during previous pay period already went over 40.  Those overtime hours would've already been paid.
-    // Previous hours + current hours are > 40, so difference is overtime
-    if ((date.day()) === 0) {
-      if ((previous + weekly) > HOURS_PER_WORK_WEEK) {
-	if (previous > HOURS_PER_WORK_WEEK) {
-	  overtime += weekly;
-	}
-	else {
-	  overtime += (weekly + previous - HOURS_PER_WORK_WEEK);
-	}
-      }
 
-      /* if (weeklyHours + previousHours > HOURS_PER_WEEK) {
-	 overtime += (weeklyHours + previousHours - HOURS_PER_WORK_WEEK);
-	 regularHours -= (weeklyHours + previousHours - HOURS_PER_WORK_WEEK);
-	 if (regularHours < 0) {regularHours = 0;}
-       * }*/
-      weekly = 0;  // Reset weekly hours on Sunday
-      previous = 0; // Reset hours worked in previous pay period that affect first week of this period
-      console.log(overtime);
-    }
-
-    // Determine if we need to use a smaller font for hoursWorked
+    // Determine if we need to use a smaller font to fit dayparts in table cell
     let daypartsSize = '';
     
     if (dayparts.length > 16) {
       daypartsSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
     
-    table += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + daypartsSize +'>' + dayparts + '</td><td>' + total + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
+    row += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + daypartsSize +'>' + dayparts + '</td><td>' + total + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
     date.add(1, 'day');
   }
 
@@ -668,16 +701,16 @@ function print() {
 
     if (talent) {
       if (totalHoursPaid) {
-	totalHoursPaid += ' + ' + talent;
+	totalHoursPaid += ' + ' + talent + 'R @ ' + rate;
       }
       else {
-	totalHoursPaid = talent;
+	totalHoursPaid = talent + 'R @ ' + rate;
       }
     }
     
     $(printWindow.document).contents().find('#due-date').html(formattedDueDate);
-    $(printWindow.document).contents().find('#dates').html(startDate.format('M/D/YY') + ' - ' + endDate.format('M/D/YY'));
-    $(printWindow.document).contents().find('#print-table').append(table);
+    $(printWindow.document).contents().find('#dates').html(start.format('M/D/YY') + ' - ' + end.format('M/D/YY'));
+    $(printWindow.document).contents().find('#print-table').append(row);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
     $(printWindow.document).contents().find('#total-hours-worked').html(regular ? Number(regular).toFixed(2) : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
@@ -748,13 +781,13 @@ function getPayPeriod() {
   }
 }
 
-function getPreviousHours(startDate) {
+function getPreviousHours(start) {
   // Determine the date of the previous Monday
-  let previousDay = startDate.day() ? moment(startDate).subtract((startDate.day() - (startDate.day() - 1)), 'days') : moment(startDate).subtract(6, 'days');
+  let previousDay = start.day() ? moment(start).subtract((start.day() - (start.day() - 1)), 'days') : moment(start).subtract(6, 'days');
   let previousHours = 0;
 
-  // Collect up all the hours from Monday of the previous pay period until startDate
-  while (previousDay.isBefore(startDate)) {
+  // Collect up all the hours from Monday of the previous pay period until start
+  while (previousDay.isBefore(start)) {
     let record = JSON.parse(localStorage.getItem(previousDay.format('YYYY-MM-DD')));
 
     if (record) {
