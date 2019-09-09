@@ -96,7 +96,11 @@ button {
 
 .navbar-nav .nav-link {
   padding-left:1rem;
-  color:rgb(206,212,218);
+  color:rgb(218,224,230);
+}
+
+.nav-link.disabled {
+  color:rgb(184,190,196);
 }
 
 .nav-link:hover {
@@ -179,4 +183,3 @@ div#wrapper {
   .sidebar {width:3rem;}
   div#content-wrapper {width: calc(100vw - 3rem); left:3rem;}
 }
-

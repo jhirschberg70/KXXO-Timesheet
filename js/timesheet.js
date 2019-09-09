@@ -48,14 +48,14 @@ function editCheck(event) {
   let instance = target.match(/\d+$/) ? target.match(/\d+$/)[0] : null;
 
   // Default to saving and deleting record being disabled
-  $('#edit-save').prop('disabled', true).addClass('btn-disabled');
+  $('.save').prop('disabled', true).addClass('btn-disabled disabled');
 
   if (target === 'edit-holiday') {
     if ($(this).is(':checked')) {
       $('.non-holiday').prop('disabled', true);
       $('.btn-hours').addClass('btn-disabled');
       $('#holiday-status').html('Yes');
-      $('#edit-save').prop('disabled', false).removeClass('btn-disabled');
+      $('.save').prop('disabled', false).removeClass('btn-disabled disabled');
       if ($('.times').length) { removeTimes(); }
     }
     else {
@@ -64,9 +64,6 @@ function editCheck(event) {
       $('#remove').prop('disabled', true);
       $('#holiday-status').html('No');
     }
-  }
-  else if (target === 'edit-delete') {
-    deleteRecord();
   }
   else {
     let vacationValid = (($('#edit-vacation').val()) != '0');
@@ -95,11 +92,12 @@ function editCheck(event) {
       let start = ($('#' + target).prop('selectionStart'));
       let end = ($('#' + target).prop('selectionEnd'));
       
-      // If pasting, rate value hasn't been updated yet.  Get current value
-      // paste in value and check against valid currency format.  If valid
-      // update input.  If typing, rate value will already be updated.  Check
-      // against valid currency format.  If not valid, remove character that
-      // was typed in.
+      /* If pasting, rate value hasn't been updated yet.  Get current value
+	 paste in value and check against valid currency format.  If valid
+	 update input.  If typing, rate value will already be updated.  Check
+	 against valid currency format.  If not valid, remove character that
+	 was typed in.
+       */
       if (event.type === 'paste') {
 	let paste = event.originalEvent.clipboardData.getData('text');
 	let length = paste.length;
@@ -123,7 +121,7 @@ function editCheck(event) {
     if ((hoursValid()) ||
 	(vacationValid && !hoursValid()) ||
 	(sickValid && !hoursValid())) {
-      $('#edit-save').prop('disabled', false).removeClass('btn-disabled');
+      $('.save').prop('disabled', false).removeClass('btn-disabled disabled');
       $('#edit-holiday').prop('disabled', true);
     }
     else {
@@ -277,8 +275,8 @@ function initHandlers() {
   $('#remove').click(editCheck);
   $('#edit-holiday').change(editCheck);
   $('.edit-select').change(editCheck);
-  $('#edit-save').click(save);
-  $('#edit-delete').click(deleteRecord);
+  $('.save').click(save);
+  $('.delete').click(deleteRecord);
   $('#print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
@@ -308,7 +306,7 @@ function view(date) {
   clear();
   
   if (record) {
-    $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
+    $('.delete').prop('disabled', false).removeClass('btn-disabled disabled');
     $('#edit-activities').val(record.activities);
     $('#edit-vacation').val(record.vacation);
     $('#edit-sick').val(record.sick);
@@ -353,8 +351,8 @@ function clear() {
   $('#holiday-status').html('No');
   $('.edit-select').val(0).prop('disabled', false);
   $('#add').prop('disabled', false).removeClass('btn-disabled');
-  $('#edit-save').prop('disabled', true).addClass('btn-disabled');
-  $('#edit-delete').prop('disabled', true).addClass('btn-disabled');
+  $('.save').prop('disabled', true).addClass('btn-disabled disabled');
+  $('.delete').prop('disabled', true).addClass('btn-disabled disabled');
   removeTimes();
 }
 
@@ -427,7 +425,7 @@ function save() {
   // Also make deleting record possible
   if (localStorage.getItem(currentDate)) {
     status = 'Record saved';
-    $('#edit-delete').prop('disabled', false).removeClass('btn-disabled');
+    $('.delete').prop('disabled', false).removeClass('btn-disabled disabled');
   }
   else {
     status = 'Save record failed';
@@ -590,7 +588,8 @@ function print() {
     let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
 
 
-    /* If there is a record for the day, retrieve it.
+    /*
+       If there is a record for the day, retrieve it.
        _dayparts: The time ranges worked on a given day
        _regular: The total number of regular hours worked for a given day
        _talent: The total number of talent hours worked for a given day
@@ -691,28 +690,18 @@ function print() {
     }
 
     if (overtime) {
-      if (totalHoursPaid) {
-	totalHoursPaid += ' + ' + overtime.toFixed(2) + ' overtime';
-      }
-      else {
-	totalHoursPaid = overtime.toFixed(2) + ' overtime';
-      }
+      totalHoursPaid += ' + ' + overtime.toFixed(2) + ' overtime';
     }
 
     if (talent) {
-      if (totalHoursPaid) {
-	totalHoursPaid += ' + ' + talent + 'R @ ' + rate;
-      }
-      else {
-	totalHoursPaid = talent + 'R @ ' + rate;
-      }
+      totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate;
     }
     
     $(printWindow.document).contents().find('#due-date').html(formattedDueDate);
     $(printWindow.document).contents().find('#dates').html(start.format('M/D/YY') + ' - ' + end.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(row);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
-    $(printWindow.document).contents().find('#total-hours-worked').html(regular ? Number(regular).toFixed(2) : '');
+    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? totalHoursPaid : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
     $(printWindow.document).contents().find('#vacation').html(vacation ? Number(vacation).toFixed(2) : '');
     $(printWindow.document).contents().find('#holiday').html(holiday ? Number(holiday).toFixed(2) : '');
