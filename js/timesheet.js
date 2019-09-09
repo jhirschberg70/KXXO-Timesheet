@@ -606,7 +606,8 @@ function print() {
       regular += _regular;
       talent += _talent;
       rate += _rate;
-      weekly += _regular + _talent;
+      // weekly += _regular + _talent;
+      weekly += _regular;
       total = Number(_regular + _talent + record.holiday + record.vacation + record.sick);
     }
 
@@ -694,7 +695,7 @@ function print() {
     }
 
     if (talent) {
-      totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate;
+      totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate.toFixed(2);
     }
     
     $(printWindow.document).contents().find('#due-date').html(formattedDueDate);
