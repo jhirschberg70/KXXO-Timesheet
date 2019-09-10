@@ -819,8 +819,10 @@ function formatDayparts(arrive, leave) {
   // Remove :, remove 00, convert AM to a and PM to p
   dayparts = dayparts.replace(/:/g, '');
   dayparts = dayparts.replace(/00/g, '');
-  dayparts = dayparts.replace(/ AM/g, 'a');
-  dayparts = dayparts.replace(/ PM/g, 'p');
+  //  dayparts = dayparts.replace(/ AM/g, 'a');
+  //  dayparts = dayparts.replace(/ PM/g, 'p');
+  dayparts = dayparts.replace(/ AM/g, '');
+  dayparts = dayparts.replace(/ PM/g, '');
 
   return dayparts;
 }
