@@ -1,9 +1,6 @@
-// Undo cases:  deleted record, saving record with no previous record saved, saving record with previous record saved
-
-const DEFAULT_TIME_DUE = '8:00 AM';
-const DEFAULT_HOURS_PER_DAY = 8.00;
-const DEFAULT_HOUR_STEP = 0.25;
-const DEFAULT_TIME_STEP = 15;
+const HOURS_PER_DAY = 8.00;
+const HOUR_STEP = 0.25;
+const TIME_STEP = 15;
 const STORAGE_DLM = '\u0000';
 const HOURS_STORAGE_DLM = '\u0001';
 const STATUS_TIMEOUT = 5000;
@@ -14,8 +11,6 @@ let currentDate;
 let dueDate;
 let undoData;
 let name;
-let hoursPerDay;
-let hourStep;
 
 function Record(holiday, activities, vacation, sick, times) {
   this.holiday = holiday;
@@ -30,11 +25,6 @@ function Times(hoursType, arrive, leave, rate) {
   this.arrive = arrive;
   this.leave = leave;
   this.rate = rate;
-}
-
-function Settings(name, hoursPerDay) {
-  this.name = name;
-  this.hoursPerDay = hoursPerDay;
 }
 
 function Undo(type, record) {
@@ -182,7 +172,6 @@ function hoursValid() {
 }
 
 function init() {
-  initSettings();
   initSelects();
   initSetDate();
   initDueDate();  
@@ -194,31 +183,14 @@ function initDueDate() {
   $('#due-date').prepend('Timesheet Due:  ' + dueDate.format('dddd, MMMM Do h:mm A'));
 }
 
-function initSettings() {
-
-  // Initialize to defaults
-  name = '';
-  hoursPerDay = DEFAULT_HOURS_PER_DAY;
-  hourStep = DEFAULT_HOUR_STEP;
-  
-  let settings = JSON.parse(localStorage.getItem('settings'));
-
-  if (settings) {
-    name = settings.name;
-    hoursPerDay = settings.hoursPerDay;
-    $('#settings-name').val(settings.name);
-    $('#settings-hours-per-day').val(settings.hoursPerDay);
-  }
-}
-
 function initSelects() {
   // Initialize hour selects
   let chooseHours = '\<option value=\"0\"\>Choose hours\<\/option\>\n';
 
   $('.edit-select').append(chooseHours);
   
-  for (let value = 1; value <= hoursPerDay/hourStep; value++) {
-    $('.edit-select').append('\<option value=\"' + value + '\"\>' + (value * hourStep) + '\<\/option\>\n');
+  for (let value = 1; value <= HOURS_PER_DAY/HOUR_STEP; value++) {
+    $('.edit-select').append('\<option value=\"' + value + '\"\>' + (value * HOUR_STEP) + '\<\/option\>\n');
   }
 }
 
@@ -270,7 +242,6 @@ function getDueDate() {
 }
 
 function initHandlers() {
-  $('#settings').click(settings);
   $('#add').click(editCheck);
   $('#remove').click(editCheck);
   $('#edit-holiday').change(editCheck);
@@ -280,7 +251,6 @@ function initHandlers() {
   $('#print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
-  $('#settings-save').click(saveSettings);
 }
 
 function undo() {
@@ -356,39 +326,6 @@ function clear() {
   removeTimes();
 }
 
-function settings() {
-  $('#settings-modal').modal();
-
-  $('#import-file-picker').change(function(event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    if (this.files && this.files[0]) {
-      let reader = new FileReader();
-      reader.onload = function (e) {
-	let lines = e.target.result.trim().split('\n');
-	
-	lines.forEach(function(line) {
-	  let [key, value] = JSON.parse(line).split(STORAGE_DLM);
-	  localStorage.setItem(key, value);
-	});
-	view(currentDate);
-      }
-      reader.readAsText(this.files[0]);
-    }
-  });
-
-  $('#export').click(function () {
-    let pairs = '';
-    for (let index = 0; index < localStorage.length; index++) {
-      let key = localStorage.key(index);
-      let value = localStorage.getItem(key);
-      
-      pairs += (JSON.stringify(key + STORAGE_DLM + value)) + '\n';
-    }
-    download(pairs, 'localStorage.txt', 'text/plain');
-  });
-}
-
 function save() {
   // If no record exists, undoData should be set to new
   // If a record already exists, undoData should be set to that record
@@ -411,7 +348,7 @@ function save() {
     times.push(JSON.stringify(_times));
   });
 
-  let record = new Record((($('#edit-holiday').prop('checked')) ? hoursPerDay : 0),
+  let record = new Record((($('#edit-holiday').prop('checked')) ? HOURS_PER_DAY : 0),
 			  ($('#edit-activities').val()),
 			  (Number($('#edit-vacation').val())),
 			  (Number($('#edit-sick').val())),
@@ -505,12 +442,12 @@ function addTimes() {
   
   $(arriveSelector).datetimepicker({
     format: 'LT',
-    stepping: DEFAULT_TIME_STEP
+    stepping: TIME_STEP
   });
 
   $(leaveSelector).datetimepicker({
     format: 'LT',
-    stepping: DEFAULT_TIME_STEP
+    stepping: TIME_STEP
   });
 
   $(arriveSelector).datetimepicker('date', '00:00');
@@ -651,10 +588,10 @@ function print() {
 
 
     // Generate notes
-    /* if (talent || vacation || sick) {
-     *   notesHtml = processNotes(++notes, talent, vacation, sick)
-     * }
-     */
+    if (talent || vacation || sick) {
+      notesHtml = processNotes(++notes, talent, vacation, sick)
+    }
+
     let rowClass = '';
 
     // If it's a weekend, shade area on timesheet
@@ -741,21 +678,6 @@ function statusDismiss() {
 
 function processNotes(notes, talent, vacation, sick) {
   let noteHtml = '\<sup\>' + notes + '\<\/sup\>';
-  
-  for (let [key, value] of talent.entries()) {
-  }
-}
-
-function saveSettings() {
-  name = $('#settings-name').val();
-  hoursPerDay = $('#settings-hours-per-day').val();
-  
-  let settings = new Settings(name, hoursPerDay);
-  
-  localStorage.setItem('settings', JSON.stringify(settings));
-}
-
-function saveSettingsCheck() {
 }
 
 // Utility functions
