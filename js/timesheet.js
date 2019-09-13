@@ -518,7 +518,7 @@ function print() {
 
   // Iterate over all dates in the pay period
   while (date.isSameOrBefore(end, 'day')) {
-    let total = '';  // Total of all hours 
+    let hours = '';  // Total of all hours for the day
     let activities = '';
     let dayparts = '';
     let notesHtml = '';
@@ -545,7 +545,7 @@ function print() {
       rate += _rate;
       // weekly += _regular + _talent;
       weekly += _regular;
-      total = Number(_regular + _talent + record.holiday + record.vacation + record.sick);
+      hours = Number(_regular + _talent + record.holiday + record.vacation + record.sick);
     }
 
     /* If it's a Sunday, determine regular and overtime hours for the week.  The work week is considered Monday - Sunday, so
@@ -607,7 +607,7 @@ function print() {
       daypartsSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
     
-    row += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + daypartsSize +'>' + dayparts + '</td><td>' + total + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
+    row += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + daypartsSize +'>' + dayparts + '</td><td>' + hours + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
     date.add(1, 'day');
   }
 
@@ -639,7 +639,7 @@ function print() {
     $(printWindow.document).contents().find('#dates').html(start.format('M/D/YY') + ' - ' + end.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(row);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
-    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? totalHoursPaid : '');
+    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? regular + talent : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
     $(printWindow.document).contents().find('#vacation').html(vacation ? Number(vacation).toFixed(2) : '');
     $(printWindow.document).contents().find('#holiday').html(holiday ? Number(holiday).toFixed(2) : '');
