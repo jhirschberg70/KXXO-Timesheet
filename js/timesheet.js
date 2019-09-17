@@ -244,6 +244,8 @@ function getDueDate() {
 function initHandlers() {
   $('#add').click(editCheck);
   $('#remove').click(editCheck);
+  $('#add-fee').click(editCheck);
+  $('#remove-fee').click(editCheck);
   $('#edit-holiday').change(editCheck);
   $('.edit-select').change(editCheck);
   $('.save').click(save);
@@ -639,7 +641,7 @@ function print() {
     $(printWindow.document).contents().find('#dates').html(start.format('M/D/YY') + ' - ' + end.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(row);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
-    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? regular + talent : '');
+    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? (regular + talent).toFixed(2) : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
     $(printWindow.document).contents().find('#vacation').html(vacation ? Number(vacation).toFixed(2) : '');
     $(printWindow.document).contents().find('#holiday').html(holiday ? Number(holiday).toFixed(2) : '');

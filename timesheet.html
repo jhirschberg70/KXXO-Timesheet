@@ -112,24 +112,29 @@
 	    <div class="col-lg-4 px-2">
 	      <div class="row">
 		<div class="col">
-		  <div id="notes" class="card shadow">
-		    <h4 class="blue card-header">Talent Fees & Notes</h4>
+		  <div id="fees" class="card shadow">
+		    <h4 class="blue card-header">Talent Fees</h4>
 		    <div class="card-body">
-		      Notes go here
+		      <button id="add-fee" class="btn-circle btn-circle-sm" role="button">+</button>
+		      <button id="remove-fee" class="btn-circle btn-circle-sm btn-disabled" role="button" disabled>-</button>
+		      <div id="edit-fees">
+		      </div>
 		    </div>
 		  </div>
 		</div>
 	      </div>
-	      <!-- <div class="row">
-		   <div class="col">
-		   <div id="summary" class="card shadow">
-		   <h4 class="blue card-header">Summary</h4>
-		   <div class="card-body">
-		   Summary goes here
-		   </div>
-		   </div>
-		   </div>
-		   </div> -->
+	      <div class="row">
+		<div class="col">
+		  <div id="notes" class="card shadow">
+		    <h4 class="blue card-header">Notes</h4>
+		    <div class="card-body">
+		      <div class="form-group">
+			<textarea class="form-control" id="notes-area" rows="3"></textarea>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	      </div>
 	    </div>
 	  </div>
 	</div>
