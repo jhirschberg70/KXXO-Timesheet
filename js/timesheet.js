@@ -65,6 +65,12 @@ function editCheck(event) {
     else if (target === 'remove') {
       removeTimes(':last');
     }
+    else if (target === 'add-fee') {
+      addFees();
+    }
+    else if (target === 'remove-fee') {
+      removeFees();
+    }
     else if (target.match(/^ht-\d+$/)) {
       if ($(targetSelector).is(':checked')) {
 	$('#s-' + instance).html('Talent');
@@ -480,6 +486,109 @@ function removeTimes(instance = '') {
 
   // If there are no more times left, disable the remove button
   if (!($('.times').length)) {
+    $('#remove').prop('disabled', true).addClass('btn-disabled');
+  }
+}
+
+function addFees() {
+  let numFees = $('.fees').length;
+  let feesID = 'fees-' + numFees;
+  let statusID = 's-' + numFees;
+  let rateGroupID = 'r-group-' + numFees;
+  let rateID = 'r-' + numFees;
+  let rateSelector = '#' + rateID;
+
+  let html = '<div id=\"' + feesID + '\" class=\"form-row fees\">';
+  html += '<div class=\"col-auto\">';
+  html += '<div class=\"form-group\">';
+  html += '<div class=\"d-block\">';
+  html += '<label>Type</label>';
+  html += '</div>';
+  html += '<div class=\"custom-control custom-switch toggle\">';
+  html += '<input type=\"checkbox\" class=\"custom-control-input non-holiday\" id=\"' + hoursTypeID + '\">';
+  html += '<label class=\"custom-control-label toggle-label\" for=\"' + hoursTypeID + '\"><div id=\"' + statusID + '\" class=\"toggle-status\">Regular</div></label>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class=\"col-sm-12- col-md\">';
+  html += '<div id=\"' + arriveTimeID + '\" class=\"form-group time arrive invalid\">';
+  html += '<label class="time-label">Arrive</label>';
+  html += '<div class=\"input-group date\" id=\"' + arriveID + '\" data-target-input=\"nearest\">';
+  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + arriveSelector + '\" data-toggle=\"datetimepicker\">';
+  html += '<div class=\"input-group-append\" data-target=\"' + arriveSelector + '\" data-toggle=\"datetimepicker\">';
+  html += '<div class=\"input-group-text\"><i class=\"fa fa-clock-o\"></i></div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class=\"col-sm-12 col-md\">';
+  html += '<div id=\"' + leaveTimeID + '\" class=\"form-group time leave invalid\">';
+  html += '<label class="time-label">Leave</label>';
+  html += '<div class=\"input-group date\" id=\"' + leaveID + '\" data-target-input=\"nearest\">';
+  html += '<input type=\"text\" class=\"form-control form-control-sm datetimepicker-input\" data-target=\"' + leaveSelector + '\" data-toggle=\"datetimepicker\">';
+  html += '<div class=\"input-group-append\" data-target=\"' + leaveSelector + '\" data-toggle=\"datetimepicker\">';
+  html += '<div class=\"input-group-text\"><i class=\"fa fa-clock-o\"></i></div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class=\"col-sm-12 col-md\">';
+  html += '<div id=\"' + rateGroupID + '\" class=\"form-group\">';
+  html += '<label>Rate</label>';
+  html += '<div class=\"input-group input-group-sm\"\">';
+  html += '<div class=\"input-group-prepend\">';
+  html += '<div class=\"input-group-text\">$</div>';
+  html += '</div>';
+  html += '<input type=\"text\" id=\"' + rateID + '\" class=\"form-control rate\" disabled>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+
+  $('#edit-hours-worked').append(html);
+
+  // Enable removal of fees
+  $('#remove').prop('disabled', false).removeClass('btn-disabled');
+  
+  $(arriveSelector).datetimepicker({
+    format: 'LT',
+    stepping: TIME_STEP
+  });
+
+  $(leaveSelector).datetimepicker({
+    format: 'LT',
+    stepping: TIME_STEP
+  });
+
+  $(arriveSelector).datetimepicker('date', '00:00');
+  $(leaveSelector).datetimepicker('date', '00:00');
+
+  $(arriveSelector).on('change.datetimepicker', editCheck);
+  $(leaveSelector).on('change.datetimepicker', editCheck);
+
+  $(hoursTypeSelector).change(editCheck);
+  $(rateSelector).on('paste', function(event) {
+    event.preventDefault();
+    editCheck(event);
+  });
+
+  $(rateSelector).on('input', function(event) {
+    if (event.originalEvent.inputType === 'insertFromPaste') {
+      event.preventDefault();
+    }
+    else {
+      editCheck(event);
+    }
+  });
+}
+
+function removeFees(instance = '') {
+  $('.fees' + instance).children('.datetimepicker-input').datetimepicker('destroy');
+  $('.fees' + instance).remove();
+
+  // If there are no more fees left, disable the remove button
+  if (!($('.fees').length)) {
     $('#remove').prop('disabled', true).addClass('btn-disabled');
   }
 }
