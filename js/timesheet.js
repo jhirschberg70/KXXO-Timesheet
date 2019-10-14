@@ -663,9 +663,9 @@ function print() {
 	else {
 	  talent.set(key, value);
 	}
-	hours += value;
+	hours = Number(hours) + Number(value);
       });
-      hours = Number(_regular + record.holiday + record.vacation + record.sick);
+      hours = Number(hours) + Number(_regular + record.holiday + record.vacation + record.sick);
     }
 
     /* If it's a Sunday, determine regular and overtime hours for the week.  The work week is considered Monday - Sunday, so
@@ -735,6 +735,8 @@ function print() {
 
   printWindow.onload = function () {
     let name = localStorage.getItem('name');
+    let totalTalentHours = 0;
+    let totalHoursWorked = 0;
 
     if (name) {
       $(printWindow.document).contents().find('#name').append('<span class="underline">' + name + '&nbsp;&nbsp;&nbsp;&nbsp;</span>');
@@ -752,19 +754,21 @@ function print() {
     }
 
     if (talent) {
-      console.log(talent);
       // totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate.toFixed(2);
       talent.forEach(function(value, key) {
 	totalHoursPaid += ' + ' + value.toFixed(2) + 'R @ $' + Number(key).toFixed(2);
+	totalTalentHours = totalTalentHours + value;
       });
     }
+
+    totalHoursWorked = (regular + totalTalentHours).toFixed(2);
     
     $(printWindow.document).contents().find('#due-date').html(formattedDueDate);
     $(printWindow.document).contents().find('#dates').html(start.format('M/D/YY') + ' - ' + end.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(row);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
     //    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? (regular + talent).toFixed(2) : '');
-    $(printWindow.document).contents().find('#total-hours-worked').html((regular) ? regular.toFixed(2) : '');
+    $(printWindow.document).contents().find('#total-hours-worked').html((totalHoursWorked) ? totalHoursWorked : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
     $(printWindow.document).contents().find('#vacation').html(vacation ? Number(vacation).toFixed(2) : '');
     $(printWindow.document).contents().find('#holiday').html(holiday ? Number(holiday).toFixed(2) : '');
@@ -842,7 +846,7 @@ function processTimes(times) {
   let regular = 0;
   let talent = new Map();
   
-  times.forEach(function(value, ---index) {
+  times.forEach(function(value, index) {
     let _times = JSON.parse(value);
 
     if (dayparts) {
