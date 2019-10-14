@@ -604,9 +604,8 @@ function print() {
      vacation: Total vacation hours used during pay period
      sick: Total sick leave taken during pay period
      regular: Total non-talent hours worked during pay period
-     talent: Total talent hours worked during pay period (doesn't include talent fees)
-     rate: Total amount to be paid for talent hours during pay period (excludes talent fees)
-     weekly: Total regular and talent hours worked for a given week WITHIN the pay period
+     talent: Map that uses the rate as a key and hours at that rate as value
+     weekly: Total regular hours worked for a given week WITHIN the pay period
      overtime: Total overtime hours to be paid during pay period
      notes: Number of notes that have been generated during pay period.  Notes occur for vacation, sick and talent
      previous:  Total regular and talent hours worked from Monday before start until start
@@ -619,8 +618,7 @@ function print() {
   let vacation = 0;
   let sick = 0;
   let regular = 0;
-  let talent = 0;
-  let rate = 0;
+  let talent = new Map();
   let weekly = 0;
   let overtime = 0;
   let notes = 0;
@@ -640,11 +638,10 @@ function print() {
        If there is a record for the day, retrieve it.
        _dayparts: The time ranges worked on a given day
        _regular: The total number of regular hours worked for a given day
-       _talent: The total number of talent hours worked for a given day
-       _rate: The total amount to be paid for talent hours on a given day
+       _talent: Map with rates as keys and hours at each rate as values
      */
     if (record) {
-      let [_dayparts, _regular, _talent, _rate] = processTimes(JSON.parse(record.times));
+      let [_dayparts, _regular, _talent] = processTimes(JSON.parse(record.times));
       
       holiday += Number(record.holiday);
       vacation += Number(record.vacation);
@@ -652,11 +649,23 @@ function print() {
       activities = record.activities;
       dayparts = _dayparts;
       regular += _regular;
-      talent += _talent;
-      rate += _rate;
       // weekly += _regular + _talent;
       weekly += _regular;
-      hours = Number(_regular + _talent + record.holiday + record.vacation + record.sick);
+
+      /*
+	 Iterate over _talent to collect up all talent hours for the day and
+	 store them in talent for the overall pay period
+       */
+      _talent.forEach(function(value, key) {
+	if (talent.has(key)) {
+	  talent.set(key, talent.get(key) + value);
+	}
+	else {
+	  talent.set(key, value);
+	}
+	hours += value;
+      });
+      hours = Number(_regular + record.holiday + record.vacation + record.sick);
     }
 
     /* If it's a Sunday, determine regular and overtime hours for the week.  The work week is considered Monday - Sunday, so
@@ -743,14 +752,19 @@ function print() {
     }
 
     if (talent) {
-      totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate.toFixed(2);
+      console.log(talent);
+      // totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate.toFixed(2);
+      talent.forEach(function(value, key) {
+	totalHoursPaid += ' + ' + value.toFixed(2) + 'R @ $' + Number(key).toFixed(2);
+      });
     }
     
     $(printWindow.document).contents().find('#due-date').html(formattedDueDate);
     $(printWindow.document).contents().find('#dates').html(start.format('M/D/YY') + ' - ' + end.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(row);
     $(printWindow.document).contents().find('#total-hours-paid').html(totalHoursPaid);
-    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? (regular + talent).toFixed(2) : '');
+    //    $(printWindow.document).contents().find('#total-hours-worked').html((regular || talent) ? (regular + talent).toFixed(2) : '');
+    $(printWindow.document).contents().find('#total-hours-worked').html((regular) ? regular.toFixed(2) : '');
     $(printWindow.document).contents().find('#sick').html(sick ? Number(sick).toFixed(2) : '');
     $(printWindow.document).contents().find('#vacation').html(vacation ? Number(vacation).toFixed(2) : '');
     $(printWindow.document).contents().find('#holiday').html(holiday ? Number(holiday).toFixed(2) : '');
@@ -814,8 +828,9 @@ function getPreviousHours(start) {
     let record = JSON.parse(localStorage.getItem(previousDay.format('YYYY-MM-DD')));
 
     if (record) {
-      let [_dayparts, _regular, _talent, _rate] = processTimes(JSON.parse(record.times));
-      previousHours += _regular + _talent;
+      let [_dayparts, _regular, _talent] = processTimes(JSON.parse(record.times));
+      // previousHours += _regular + _talent;
+      previousHours += _regular;
     }
     previousDay.add(1, 'day');
   }
@@ -825,10 +840,9 @@ function getPreviousHours(start) {
 function processTimes(times) {
   let dayparts = '';
   let regular = 0;
-  let talent = 0;
-  let rate = 0;
+  let talent = new Map();
   
-  times.forEach(function(value, index) {
+  times.forEach(function(value, ---index) {
     let _times = JSON.parse(value);
 
     if (dayparts) {
@@ -836,15 +850,20 @@ function processTimes(times) {
     }
     dayparts += formatDayparts(_times.arrive, _times.leave);
     if (_times.hoursType) {
-      talent += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));
-      rate += Number(_times.rate);
+      if (talent.has(_times.rate)) {
+	talent.set(_times.rate, talent.get(_times.rate) +
+				Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true)));
+      }
+      else {
+	talent.set(_times.rate, Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true)));
+      }
     }
     else {
       regular += Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true));
     }
   });
 
-  return [dayparts, regular, talent, rate];
+  return [dayparts, regular, talent];
 }
 
 function formatDayparts(arrive, leave) {
