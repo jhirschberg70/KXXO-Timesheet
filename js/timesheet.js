@@ -666,6 +666,13 @@ function print() {
 	hours = Number(hours) + Number(value);
       });
       hours = Number(hours) + Number(_regular + record.holiday + record.vacation + record.sick);
+
+      // Generate notes
+      if (_talent.size || record.vacation || record.sick) {
+	console.log(_talent);
+	notesHtml = processNotes(++notes, _talent, record.vacation, record.sick);
+	hours += '\<sup\>' + notes + '\<\/sup\>';
+      }
     }
 
     /* If it's a Sunday, determine regular and overtime hours for the week.  The work week is considered Monday - Sunday, so
@@ -706,12 +713,6 @@ function print() {
       previous = 0;
     }
 
-
-    // Generate notes
-    if (talent || vacation || sick) {
-      notesHtml = processNotes(++notes, talent, vacation, sick)
-    }
-
     let rowClass = '';
 
     // If it's a weekend, shade area on timesheet
@@ -736,14 +737,13 @@ function print() {
   printWindow.onload = function () {
     let name = localStorage.getItem('name');
     let totalTalentHours = 0;
-    let totalHoursWorked = 0;
+    let totalHoursWorked = regular.toFixed(2);
+    let formattedDueDate = dueDate.format('dddd, MMMM Do') + '<br>' + dueDate.format('h:mm A');
+    let totalHoursPaid = '';
 
     if (name) {
       $(printWindow.document).contents().find('#name').append('<span class="underline">' + name + '&nbsp;&nbsp;&nbsp;&nbsp;</span>');
     }
-
-    let formattedDueDate = dueDate.format('dddd, MMMM Do') + '<br>' + dueDate.format('h:mm A');
-    let totalHoursPaid = '';
 
     if (Number(regular + holiday + vacation + sick)) {
       totalHoursPaid = (Number(regular + holiday + vacation + sick)).toFixed(2);
@@ -757,12 +757,10 @@ function print() {
       // totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate.toFixed(2);
       talent.forEach(function(value, key) {
 	totalHoursPaid += ' + ' + value.toFixed(2) + 'R @ $' + Number(key).toFixed(2);
-	totalTalentHours = totalTalentHours + value;
+	totalHoursWorked += ' + ' + value.toFixed(2) + 'R';
       });
     }
 
-    totalHoursWorked = (regular + totalTalentHours).toFixed(2);
-    
     $(printWindow.document).contents().find('#due-date').html(formattedDueDate);
     $(printWindow.document).contents().find('#dates').html(start.format('M/D/YY') + ' - ' + end.format('M/D/YY'));
     $(printWindow.document).contents().find('#print-table').append(row);
