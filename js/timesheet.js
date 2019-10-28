@@ -178,6 +178,7 @@ function hoursValid() {
 }
 
 function init() {
+  initUsers();
   initSelects();
   initSetDate();
   initDueDate();  
@@ -256,9 +257,10 @@ function initHandlers() {
   $('.edit-select').change(editCheck);
   $('.save').click(save);
   $('.delete').click(deleteRecord);
-  $('#print').click(print);
+  $('#navbar-print').click(print);
   $('#undo').click(undo);
   $('#status-dismiss').click(statusDismiss);
+  $('#navbar-user').click(selectUser);
 }
 
 function undo() {
