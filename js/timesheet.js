@@ -265,10 +265,10 @@ function initHandlers() {
 
 function undo() {
   if (((undoData.type === 'edit') && (undoData.record)) || (undoData.type === 'delete')) {
-    localStorage.setItem(currentDate, JSON.stringify(undoData.record));
+    localStorage.setItem(currentUser + currentDate, JSON.stringify(undoData.record));
   }
   else {
-    localStorage.removeItem(currentDate);
+    localStorage.removeItem(currentUser + currentDate);
   }
 
   updateStatus('Undone');
@@ -280,7 +280,7 @@ function view(date) {
   currentDate = $('#set-date').datetimepicker('date').format('YYYY-MM-DD');
 
   // Check to see if current date has a record
-  let record = JSON.parse(localStorage.getItem(currentDate));
+  let record = JSON.parse(localStorage.getItem(currentUser + currentDate));
 
   // First clear everything out as if nothing has been set, then process record
   clear();
@@ -341,7 +341,7 @@ function save() {
   // If a record already exists, undoData should be set to that record
   undoData = new Undo('new', '');
 
-  let previousRecord = JSON.parse(localStorage.getItem(currentDate));
+  let previousRecord = JSON.parse(localStorage.getItem(currentUser + currentDate));
 
   if (previousRecord) {
     undoData = new Undo('edit', previousRecord);
@@ -364,13 +364,13 @@ function save() {
 			  (Number($('#edit-sick').val())),
 			  JSON.stringify(times));
   
-  localStorage.setItem(currentDate, JSON.stringify(record));
+  localStorage.setItem(currentUser + currentDate, JSON.stringify(record));
 
   let status = '';
 
   // Generate message for modal depending on whether or not information saved
   // Also make deleting record possible
-  if (localStorage.getItem(currentDate)) {
+  if (localStorage.getItem(currentUser + currentDate)) {
     status = 'Record saved';
     $('.delete').prop('disabled', false).removeClass('btn-disabled disabled');
   }
@@ -633,7 +633,7 @@ function print() {
     let activities = '';
     let dayparts = '';
     let notesHtml = '';
-    let record = JSON.parse(localStorage.getItem(date.format('YYYY-MM-DD')));
+    let record = JSON.parse(localStorage.getItem(currentUser + date.format('YYYY-MM-DD')));
 
 
     /*
@@ -737,14 +737,14 @@ function print() {
   let printWindow = window.open('print.html');
 
   printWindow.onload = function () {
-    let name = localStorage.getItem('name');
+    // let name = localStorage.getItem('name');
     let totalTalentHours = 0;
     let totalHoursWorked = regular.toFixed(2);
     let formattedDueDate = dueDate.format('dddd, MMMM Do') + '<br>' + dueDate.format('h:mm A');
     let totalHoursPaid = '';
 
-    if (name) {
-      $(printWindow.document).contents().find('#name').append('<span class="underline">' + name + '&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    if (currentUser) {
+      $(printWindow.document).contents().find('#name').append('<span class="underline">' + currentUser + '&nbsp;&nbsp;&nbsp;&nbsp;</span>');
     }
 
     if (Number(regular + holiday + vacation + sick)) {
@@ -776,10 +776,10 @@ function print() {
 }
 
 function deleteRecord() {
-  let record = JSON.parse(localStorage.getItem(currentDate));
+  let record = JSON.parse(localStorage.getItem(currentUser + currentDate));
 
   undoData = new Undo('delete', record);
-  localStorage.removeItem(currentDate);
+  localStorage.removeItem(currentUser + currentDate);
   updateStatus('Record deleted');
   view(currentDate);
 }
@@ -829,7 +829,7 @@ function getPreviousHours(start) {
 
   // Collect up all the hours from Monday of the previous pay period until start
   while (previousDay.isBefore(start)) {
-    let record = JSON.parse(localStorage.getItem(previousDay.format('YYYY-MM-DD')));
+    let record = JSON.parse(localStorage.getItem(currentUser + previousDay.format('YYYY-MM-DD')));
 
     if (record) {
       let [_dayparts, _regular, _talent] = processTimes(JSON.parse(record.times));
