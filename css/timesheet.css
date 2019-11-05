@@ -154,6 +154,10 @@ div#holiday-status {
   padding-top:.2rem;
 }
 
+div#stats{
+  height:25vh;
+}
+
 div#status {
   position:fixed;
   width:250px;
