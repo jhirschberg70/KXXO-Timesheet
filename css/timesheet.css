@@ -149,13 +149,26 @@ div#content-wrapper {
   overflow-x:hidden;
 }
 
+div#daily-activities {
+  min-height:calc(80vh - 1rem);
+  max-height:calc(80vh - 1rem);
+  overflow-y:auto;
+}
+
+div#fees, div#notes {
+  min-height:calc(40vh - 1rem);
+  max-height:calc(40vh - 1rem);
+  overflow-y:auto;
+}
+
 div#holiday-status {
   width:2.78rem;
   padding-top:.2rem;
 }
 
-div#stats{
-  height:25vh;
+div#stats {
+  min-height:calc(20vh - 2rem);
+  overflow-y:auto;
 }
 
 div#status {
