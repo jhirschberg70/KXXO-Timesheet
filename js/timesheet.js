@@ -360,8 +360,8 @@ function save() {
 
   let record = new Record((($('#edit-holiday').prop('checked')) ? HOURS_PER_DAY : 0),
 			  ($('#edit-activities').val()),
-			  (Number($('#edit-vacation').val())),
-			  (Number($('#edit-sick').val())),
+			  (Number($('#edit-vacation').val()/(1/HOUR_STEP))),
+			  (Number($('#edit-sick').val()/(1/HOUR_STEP))),
 			  JSON.stringify(times));
   
   localStorage.setItem(currentUser + currentDate, JSON.stringify(record));
