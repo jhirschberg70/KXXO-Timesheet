@@ -288,8 +288,8 @@ function view(date) {
   if (record) {
     $('.delete').prop('disabled', false).removeClass('btn-disabled disabled');
     $('#edit-activities').val(record.activities);
-    $('#edit-vacation').val(record.vacation);
-    $('#edit-sick').val(record.sick);
+    $('#edit-vacation').val(record.vacation/HOUR_STEP);
+    $('#edit-sick').val(record.sick/HOUR_STEP);
 
     if (record.holiday) {
       $('#edit-holiday').trigger('click');
@@ -358,6 +358,7 @@ function save() {
     times.push(JSON.stringify(_times));
   });
 
+  console.log($('#edit-vacation').val());
   let record = new Record((($('#edit-holiday').prop('checked')) ? HOURS_PER_DAY : 0),
 			  ($('#edit-activities').val()),
 			  (Number($('#edit-vacation').val()/(1/HOUR_STEP))),
@@ -673,7 +674,7 @@ function print() {
       if (_talent.size || record.vacation || record.sick) {
 	console.log(_talent);
 	notesHtml = processNotes(++notes, _talent, record.vacation, record.sick);
-	hours += '\<sup\>' + notes + '\<\/sup\>';
+	// hours += '\<sup\>' + notes + '\<\/sup\>';
       }
     }
 
