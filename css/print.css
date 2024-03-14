@@ -1,15 +1,18 @@
 @page {
-  size:  auto;   /* auto is the initial value */
-  margin: 0mm;  /* this affects the margin in the printer settings */
+  size: auto;
+  /* auto is the initial value */
+  margin: 0mm;
+  /* this affects the margin in the printer settings */
 }
 
 html {
-
-  margin: 0px;  /* this affects the margin on the html before sending to printer */
+  /* this affects the margin on the html before sending to printer */
+  margin: 0px;
 }
 
 body {
-  margin: 0mm; /* margin you want for the content */
+  /* margin you want for the content */
+  margin: 0mm; 
   width:215.9mm;
   font-family:Arial;
 }
@@ -19,64 +22,64 @@ table {
 }
 
 tr {
-  height:6mm;
+  height: 6mm;
 }
 
 td {
-  border:1px solid #000;
-  font-size:4mm;
-  text-align:center;
+  border: 1px solid #000;
+  font-size: 4mm;
+  text-align: center;
 }
 
 div#logo {
-  float:left;
-  width:95mm;
-  padding-left:10mm;
-  padding-top:12mm;
+  float: left;
+  width: 95mm;
+  padding-left: 10mm;
+  padding-top: 12mm;
 }
 
 div#logo img {
-  width:83mm;
+  width: 83mm;
 }
 
 div#name {
-  padding-top:7mm;
-  font-size:4.5mm;
-  font-weight:bold;
+  padding-top: 7mm;
+  font-size: 4.5mm;
+  font-weight: bold;
 }
 
 div#info {
-  float:right;
-  padding-top:12.5mm;
-  padding-right:34.5mm;
-  font-weight:bold;
+  float: right;
+  padding-top: 12.5mm;
+  padding-right: 34.5mm;
+  font-weight: bold;
 }
 
 div#company {
-  text-align:center;
-  padding-bottom:2.5mm;
-  font-size:5.5mm;
+  text-align: center;
+  padding-bottom: 2.5mm;
+  font-size: 5.5mm;
 }
 
 div#due {
-  text-align:center;
-  border:1px solid #000;
-  padding-top:1.5mm;
-  padding-bottom:1.5mm;
-  padding-left:5.5mm;
-  padding-right:5.5mm;
-  font-size:4.5mm;
+  text-align: center;
+  border: 1px solid #000;
+  padding-top: 1.5mm;
+  padding-bottom: 1.5mm;
+  padding-left: 5.5mm;
+  padding-right: 5.5mm;
+  font-size: 4.5mm;
 }
 
 div#range {
-  padding-top:4mm;
-  font-size:4.5mm;
+  padding-top: 4mm;
+  font-size: 4.5mm;
 }
 
 div#hours {
-  padding-left:8mm;
-  padding-right:8mm;
-  padding-top:6mm;
+  padding-left: 8mm;
+  padding-right: 8mm;
+  padding-top: 6mm;
 }
 
 div#due {
@@ -84,16 +87,15 @@ div#due {
 }
 
 table#printTable {
-  padding-top:2mm;
+  padding-top: 2mm;
 }
 
 div#summary {
-  padding-left:10mm;
+  padding-left: 10mm;
 }
 
 .shaded {
-  background-color:#ededed;
-  -webkit-print-color-adjust: exact;
+  background-image: url("../images/background.png");
 }
 
 .bold {
@@ -105,35 +107,35 @@ div#summary {
 }
 
 .headings {
-  height:5mm;
-  font-size:4.5mm;
-  font-weight:bold;
+  height: 5mm;
+  font-size: 4.5mm;
+  font-weight: bold;
 }
 
 .date {
-  width:26mm;
+  width: 26mm;
 }
 
 .hoursWorked {
-  width:33mm;
+  width: 33mm;
 }
 
 .hours {
-  width:21mm;
+  width: 21mm;
 }
 
 .activities {
-  width:119mm;
+  width: 119mm;
 }
 
 .activitiesText {
-  text-align:left;
-  padding-left:2mm;
+  text-align: left;
+  padding-left: 2mm;
 }
 
 .total {
-  display:inline-block;
-  border-bottom:1px solid rgb(0,0,0);
-  text-align:right;
-  overflow:visible;
+  display: inline-block;
+  border-bottom: 1px solid rgb(0, 0, 0);
+  text-align: right;
+  overflow: visible;
 }
