@@ -1,240 +1,247 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>KXXO Timesheet</title>
 
-    <script src="js/jquery.min.js"></script>
-    <script src="js/moment.min.js"></script>
-    <script src="js/download.js"></script>
-    <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="js/tempusdominus-bootstrap-4.js"></script>
-    <script src="js/users.js"></script>
-    <script src="js/timesheet.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="css/tempusdominus-bootstrap-4.css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,500,700" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="css/users.css">
-    <link rel="stylesheet" type="text/css" href="css/timesheet.css">
-  </head>
-  <body>
-    <div id="wrapper">
-      <ul class="navbar-nav sidebar d-flex bg-gradient-primary pt-4">
-	<li class="nav-item">
-	  <a id="navbar-print" class="nav-link" href="#">
-	    <i class="fa fa-lg fa-print fw"></i>
-	    <span class="link-text">&nbsp; Print</span>
-	  </a>
-	</li>
-	<li class="nav-item">
-	  <a id="navbar-save" class="nav-link save disabled" href="#">
-	    <i class="fa fa-lg fa-floppy-o"></i>
-	    <span class="link-text">&nbsp; Save</span>
-	  </a>
-	</li>
-	<li class="nav-item">
-	  <a id="navbar-delete" class="nav-link delete disabled" href="#">
-	    <i class="fa fa-lg fa-trash-o"></i>
-	    <span class="link-text">&nbsp; Delete</span>
-	  </a>
-	</li>
-	<li class="nav-item">
-	  <a id="navbar-user" class="nav-link" href="#">
-	    <i class="fa fa-lg fa-user-o"></i>
-	    <span class="link-text">&nbsp; Change User</span>
-	  </a>
-	</li>
-      </ul>
-      <div id="content-wrapper">
-	<div id="main" class="container-fluid">
-	  <div class="row mx-n1 mt-3">
-	    <div class="col px-2">
-	      <div id="stats" class="card shadow">
-		<h4 class="card-header blue">Stats</h4>
-		<div class="card-body">
-		  <p>Foo</p>
-		</div>
-	      </div>
-	    </div>
-	  </div>
-	  <div class="row mx-n1">
-	    <div class="col-lg-8 px-2">
-	      <div id="daily-activities" class="card shadow">
-		<h4 class="card-header blue">Daily Activities</h4>
-		<div class="card-body">
-		  <div class="navbar navbar-expand pr-0">
-		    <ul class="navbar-nav ml-auto">
-		      <li class="nav-item float-right">
-			<button id="edit-save" class="btn-circle btn-circle-md btn-disabled save" disabled>
-			  <i class="fa fa-lg fa-floppy-o"></i>
-			</button>
-		      </li>
-		      <li class="nav-item">
-			<button id="edit-delete" class="btn-circle btn-circle-md btn-disabled delete" disabled>
-			  <i class="fa fa-lg fa-trash-o"></i>
-			</button>
-		      </li>
-		    </ul>
-		  </div>
-		  <div class="row">
-		    <div class="col">
-		      <div id="set-date" class="border-gray border-top-0">
-		      </div>
-		    </div>
-		  </div>
-		  <hr>
-		  <div id="record">
-		    <div class="form-row">
-		      <div class="col-auto form-group">
-			<div class="d-block">
-			  <label>Holiday</label>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>KXXO Timesheet</title>
+
+	<script src="js/jquery.min.js"></script>
+	<script src="js/moment.min.js"></script>
+	<script src="js/download.js"></script>
+	<script src="js/bootstrap.bundle.min.js"></script>
+	<script src="js/tempusdominus-bootstrap-4.js"></script>
+	<script src="js/users.js"></script>
+	<script src="js/timesheet.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="css/tempusdominus-bootstrap-4.css">
+	<link href="https://fonts.googleapis.com/css?family=Nunito:200,400,500,700" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/users.css">
+	<link rel="stylesheet" type="text/css" href="css/timesheet.css">
+</head>
+
+<body>
+	<div id="wrapper">
+		<ul class="navbar-nav sidebar d-flex bg-gradient-primary pt-4">
+			<li class="nav-item">
+				<a id="navbar-print" class="nav-link" href="#">
+					<i class="fa fa-lg fa-print fw"></i>
+					<span class="link-text">&nbsp; Print</span>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a id="navbar-save" class="nav-link save disabled" href="#">
+					<i class="fa fa-lg fa-floppy-o"></i>
+					<span class="link-text">&nbsp; Save</span>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a id="navbar-delete" class="nav-link delete disabled" href="#">
+					<i class="fa fa-lg fa-trash-o"></i>
+					<span class="link-text">&nbsp; Delete</span>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a id="navbar-user" class="nav-link" href="#">
+					<i class="fa fa-lg fa-user-o"></i>
+					<span class="link-text">&nbsp; Change User</span>
+				</a>
+			</li>
+		</ul>
+		<div id="content-wrapper">
+			<div id="main" class="container-fluid">
+				<div class="row mx-n1 mt-3">
+					<div class="col px-2">
+						<div id="stats" class="card shadow">
+							<h4 class="card-header blue">Stats</h4>
+							<div class="card-body">
+								<p>Foo</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row mx-n1">
+					<div class="col-lg-8 px-2">
+						<div id="daily-activities" class="card shadow">
+							<h4 class="card-header blue">Daily Activities</h4>
+							<div class="card-body">
+								<div class="navbar navbar-expand pr-0">
+									<ul class="navbar-nav ml-auto">
+										<li class="nav-item float-right">
+											<button id="edit-save" class="btn-circle btn-circle-md btn-disabled save" disabled>
+												<i class="fa fa-lg fa-floppy-o"></i>
+											</button>
+										</li>
+										<li class="nav-item">
+											<button id="edit-delete" class="btn-circle btn-circle-md btn-disabled delete" disabled>
+												<i class="fa fa-lg fa-trash-o"></i>
+											</button>
+										</li>
+									</ul>
+								</div>
+								<div class="row">
+									<div class="col">
+										<div id="set-date" class="border-gray border-top-0">
+										</div>
+									</div>
+								</div>
+								<hr>
+								<div id="record">
+									<div class="form-row">
+										<div class="col-auto form-group">
+											<div class="d-block">
+												<label>Holiday</label>
+											</div>
+											<div class="custom-control custom-switch toggle">
+												<input type="checkbox" class="custom-control-input" id="edit-holiday">
+												<label class="custom-control-label toggle-label" for="edit-holiday">
+													<div id="holiday-status" class="toggle-status">No</div>
+												</label>
+											</div>
+										</div>
+										<div class="col-sm-12 col-md form-group">
+											<label>Activities</label>
+											<input type="text" id="edit-activities" class="form-control form-control-sm" value="" />
+										</div>
+										<div class="col-sm-12 col-md form-group">
+											<label>Vacation</label>
+											<select id="edit-vacation" class="custom-select custom-select-sm edit-select non-holiday">
+											</select>
+										</div>
+										<div class="col-sm-12 col-md form-group">
+											<label>Sick Leave</label>
+											<select id="edit-sick" class="custom-select custom-select-sm edit-select non-holiday">
+											</select>
+										</div>
+									</div>
+									<br />
+									<div class="form-row">
+										<div class="col form-group">
+											<label>Hours Worked</label>
+											<button id="add" class="btn-circle btn-circle-sm btn-hours non-holiday" role="button">+</button>
+											<button id="remove" class="btn-circle btn-circle-sm btn-hours btn-disabled non-holiday"
+												role="button" disabled>-</button>
+											<div id="edit-hours-worked">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4 px-2">
+						<div class="row">
+							<div class="col">
+								<div id="fees" class="card shadow">
+									<h4 class="blue card-header">Talent Fees</h4>
+									<div class="card-body">
+										<button id="add-fee" class="btn-circle btn-circle-sm" role="button">+</button>
+										<button id="remove-fee" class="btn-circle btn-circle-sm btn-disabled" role="button"
+											disabled>-</button>
+										<div id="edit-fees">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col">
+								<div id="notes" class="card shadow">
+									<h4 class="blue card-header">Notes</h4>
+									<div class="card-body">
+										<div class="form-group">
+											<textarea class="form-control" id="notes-area" rows="3"></textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div class="custom-control custom-switch toggle">
-			  <input type="checkbox" class="custom-control-input" id="edit-holiday">
-			  <label class="custom-control-label toggle-label" for="edit-holiday"><div id="holiday-status" class="toggle-status">No</div></label>
-			</div>
-		      </div>
-		      <div class="col-sm-12 col-md form-group">
-			<label>Activities</label>
-			<input type="text" id="edit-activities" class="form-control form-control-sm" value=""/>
-		      </div>
-		      <div class="col-sm-12 col-md form-group">
-			<label>Vacation</label>
-			<select id="edit-vacation" class="custom-select custom-select-sm edit-select non-holiday">
-			</select>
-		      </div>
-		      <div class="col-sm-12 col-md form-group">
-			<label>Sick Leave</label>
-			<select id="edit-sick" class="custom-select custom-select-sm edit-select non-holiday">
-			</select>
-		      </div>
-		    </div>
-		    <br />
-		    <div class="form-row">
-		      <div class="col form-group">
-			<label>Hours Worked</label>
-			<button id="add" class="btn-circle btn-circle-sm btn-hours non-holiday" role="button">+</button>
-			<button id="remove" class="btn-circle btn-circle-sm btn-hours btn-disabled non-holiday" role="button" disabled>-</button>
-			<div id="edit-hours-worked">
-			</div>
-		      </div>
-		    </div>
-		  </div>
 		</div>
-	      </div>
-	    </div>
-	    <div class="col-lg-4 px-2">
-	      <div class="row">
-		<div class="col">
-		  <div id="fees" class="card shadow">
-		    <h4 class="blue card-header">Talent Fees</h4>
-		    <div class="card-body">
-		      <button id="add-fee" class="btn-circle btn-circle-sm" role="button">+</button>
-		      <button id="remove-fee" class="btn-circle btn-circle-sm btn-disabled" role="button" disabled>-</button>
-		      <div id="edit-fees">
-		      </div>
-		    </div>
-		  </div>
-		</div>
-	      </div>
-	      <div class="row">
-		<div class="col">
-		  <div id="notes" class="card shadow">
-		    <h4 class="blue card-header">Notes</h4>
-		    <div class="card-body">
-		      <div class="form-group">
-			<textarea class="form-control" id="notes-area" rows="3"></textarea>
-		      </div>
-		    </div>
-		  </div>
-		</div>
-	      </div>
-	    </div>
-	  </div>
 	</div>
-      </div>
-    </div>
-    <div id="status" role="alert">
-      <div id="status-contents">
-	<span id="status-msg"></span>
-	<div id="status-controls" class="float-right">
-	  <a id="undo" class="ml-3 pr-2 hide" href="#">Undo</a>
-	  <i id="status-dismiss" class="font-weight-lighter cursor-pointer text-white fa fa-times"></i>
+	<div id="status" role="alert">
+		<div id="status-contents">
+			<span id="status-msg"></span>
+			<div id="status-controls" class="float-right">
+				<a id="undo" class="ml-3 pr-2 hide" href="#">Undo</a>
+				<i id="status-dismiss" class="font-weight-lighter cursor-pointer text-white fa fa-times"></i>
+			</div>
+		</div>
 	</div>
-      </div>
-    </div>
-    <div id="users" class="modal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-	<div class="modal-content">
-	  <div class="modal-header">
-            <h5 class="modal-title">Select User</h5>
-            <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	<div id="users" class="modal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Select User</h5>
+					<!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		 <span aria-hidden="true">&times;</span>
 		 </button> -->
-	  </div>
-	  <div class="modal-body">
-	    <ul class="list-unstyled">
-	      <li id="Ann D'Angelo" class="media user-select">
-		<img src="images/ann.jpg" class="mr-3" alt="ann.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">Ann D'Angelo</h5>
-		</div>
-	      </li>
-	      <li id="Anna Winter" class="media my-2 user-select">
-		<img src="images/anna.jpg" class="mr-3" alt="anna.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">Anna Winter</h5>
-		</div>
-	      </li>
-	      <li id="Jeff Hirschberg" class="media user-select">
-		<img src="images/jeff.jpg" class="mr-3" alt="jeff.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">Jeff Hirschberg</h5>
-		</div>
-	      </li>
-	      <li id="Jennifer Mathis" class="media my-2 user-select">
-		<img src="images/jennifer.jpg" class="mr-3" alt="jennifer.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">Jennifer Mathis</h5>
-		</div>
-	      </li>
-	      <li id="JJ Syrja" class="media user-select">
-		<img src="images/jj.jpg" class="mr-3" alt="jj.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">JJ Syrja</h5>
-		</div>
-	      </li>
-	      <li id="John Foster" class="media my-2 user-select">
-		<img src="images/john.jpg" class="mr-3" alt="john.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">John Foster</h5>
-		</div>
-	      </li>
-	      <li id="Tammy T" class="media user-select">
-		<img src="images/tammy.jpg" class="mr-3" alt="tammy.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">Tammy T</h5>
-		</div>
-	      </li>
-	      <li id="Ty Flint" class="media my-2 user-select">
-		<img src="images/ty.jpg" class="mr-3" alt="ty.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">Ty Flint</h5>
-		</div>
-	      </li>
-	      <li id="Warrn Fazio" class="media user-select">
-		<img src="images/warren.jpg" class="mr-3" alt="warren.jpg">
-		<div class="media-body">
-		  <h5 class="mt-0 mb-1">Warren Fazio</h5>
-		</div>
-	      </li>
-	    </ul>
-	    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+				<div class="modal-body">
+					<ul class="list-unstyled">
+						<li id="Ann D'Angelo" class="media user-select">
+							<img src="images/ann.jpg" class="mr-3" alt="ann.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">Ann D'Angelo</h5>
+							</div>
+						</li>
+						<li id="Anna Winter" class="media my-2 user-select">
+							<img src="images/anna.jpg" class="mr-3" alt="anna.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">Anna Winter</h5>
+							</div>
+						</li>
+						<li id="Jeff Hirschberg" class="media user-select">
+							<img src="images/jeff.jpg" class="mr-3" alt="jeff.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">Jeff Hirschberg</h5>
+							</div>
+						</li>
+						<li id="Jennifer Mathis" class="media my-2 user-select">
+							<img src="images/jennifer.jpg" class="mr-3" alt="jennifer.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">Jennifer Mathis</h5>
+							</div>
+						</li>
+						<li id="JJ Syrja" class="media user-select">
+							<img src="images/jj.jpg" class="mr-3" alt="jj.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">JJ Syrja</h5>
+							</div>
+						</li>
+						<li id="John Foster" class="media my-2 user-select">
+							<img src="images/john.jpg" class="mr-3" alt="john.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">John Foster</h5>
+							</div>
+						</li>
+						<li id="Tammy T" class="media user-select">
+							<img src="images/tammy.jpg" class="mr-3" alt="tammy.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">Tammy T</h5>
+							</div>
+						</li>
+						<li id="Ty Flint" class="media my-2 user-select">
+							<img src="images/ty.jpg" class="mr-3" alt="ty.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">Ty Flint</h5>
+							</div>
+						</li>
+						<li id="Warrn Fazio" class="media user-select">
+							<img src="images/warren.jpg" class="mr-3" alt="warren.jpg">
+							<div class="media-body">
+								<h5 class="mt-0 mb-1">Warren Fazio</h5>
+							</div>
+						</li>
+					</ul>
+					<!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 		 <button type="button" class="btn btn-primary">Save changes</button> -->
-	  </div>
+				</div>
+			</div>
+		</div>
 	</div>
-      </div>
-    </div>
-  </body>
+</body>
+
 </html>

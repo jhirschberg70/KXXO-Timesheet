@@ -57,8 +57,8 @@ function editCheck(event) {
   }
   else {
     let vacationValid = (($('#edit-vacation').val()) != '0');
-    let sickValid =  (($('#edit-sick').val()) != '0');
-    
+    let sickValid = (($('#edit-sick').val()) != '0');
+
     if (target === 'add') {
       addTimes();
     }
@@ -73,50 +73,53 @@ function editCheck(event) {
     }
     else if (target.match(/^ht-\d+$/)) {
       if ($(targetSelector).is(':checked')) {
-	$('#s-' + instance).html('Talent');
-	$('#r-' + instance).prop('disabled', false);
+        $('#s-' + instance).html('Talent');
+        $('#r-' + instance).prop('disabled', false);
       }
       else {
-	$('#s-' + instance).html('Regular');
-	$('#r-' + instance).prop('disabled', true);
+        $('#s-' + instance).html('Regular');
+        $('#r-' + instance).prop('disabled', true);
       }
     }
-    // If rate is being changed, check to see that change is valid
-    // If it is, update input
+    /*
+    If rate is being changed, check to see that change is valid
+    If it is, update input
+    */
     else if (target.match(/^r-\d+$/)) {
       let rate = $('#' + target).val();
       let start = ($('#' + target).prop('selectionStart'));
       let end = ($('#' + target).prop('selectionEnd'));
-      
-      /* If pasting, rate value hasn't been updated yet.  Get current value
-	 paste in value and check against valid currency format.  If valid
-	 update input.  If typing, rate value will already be updated.  Check
-	 against valid currency format.  If not valid, remove character that
-	 was typed in.
+
+      /* 
+      If pasting, rate value hasn't been updated yet.  Get current value
+      paste in value and check against valid currency format.  If valid
+      update input.  If typing, rate value will already be updated.  Check
+      against valid currency format.  If not valid, remove character that
+      was typed in.
        */
       if (event.type === 'paste') {
-	let paste = event.originalEvent.clipboardData.getData('text');
-	let length = paste.length;
-	let cursor = end + (length - (end - start));
-	rate = rate.substring(0, (start)) + paste + rate.substring(end);
-	
-	if (rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/)) {
-	  $('#' + target).val(rate);
-	  $('#' + target)[0].setSelectionRange(cursor, cursor);
-	}
+        let paste = event.originalEvent.clipboardData.getData('text');
+        let length = paste.length;
+        let cursor = end + (length - (end - start));
+        rate = rate.substring(0, (start)) + paste + rate.substring(end);
+
+        if (rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/)) {
+          $('#' + target).val(rate);
+          $('#' + target)[0].setSelectionRange(cursor, cursor);
+        }
       }
       else {
-	if (!(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/))) {
-	  rate = rate.substring(0, (start - 1)) + rate.substring(start);
-	  $('#' + target).val(rate);
-	  $('#' + target)[0].setSelectionRange(end - 1, end - 1);
-	}
+        if (!(rate.match(/^(0*[1-9]\d*|0*[1-9]\d*\.\d{0,2})$/))) {
+          rate = rate.substring(0, (start - 1)) + rate.substring(start);
+          $('#' + target).val(rate);
+          $('#' + target)[0].setSelectionRange(end - 1, end - 1);
+        }
       }
     }
-    
+
     if ((hoursValid()) ||
-	(vacationValid && !hoursValid()) ||
-	(sickValid && !hoursValid())) {
+      (vacationValid && !hoursValid()) ||
+      (sickValid && !hoursValid())) {
       $('.save').prop('disabled', false).removeClass('btn-disabled disabled');
       $('#edit-holiday').prop('disabled', true);
     }
@@ -130,12 +133,12 @@ function hoursValid() {
   // Checks that times don't overlap and that hours marked as Talent have a valid rate set
   let numTimes = $('.times').length;
   let hoursValid = numTimes;
-  
+
   // Check that all times are valid.  First check that all arrive times are
   // < leave times.  Then check that return time is > previous leave time.
   for (let time = 0; time < numTimes; time++) {
     let arrive = moment(currentDate + ' ' + ($('#a-' + time).datetimepicker('date').format('HH:mm')));
-    let leave  = moment(currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('HH:mm')));
+    let leave = moment(currentDate + ' ' + ($('#l-' + time).datetimepicker('date').format('HH:mm')));
     let prevLeave = moment('1970-01-01 00:00'); // Beginning of time
     let hoursType = $('#ht-' + time).val();
     let rate = $('#r-' + time).val();
@@ -164,7 +167,7 @@ function hoursValid() {
       $('#r-group-' + time).removeClass('invalid');
       $('#r-' + time).val('');
     }
-    
+
     if (($('#ht-' + time).is(':checked')) && !rate.length) {
       $('#r-group-' + time).addClass('invalid');
       hoursValid = false;
@@ -181,7 +184,7 @@ function init() {
   initUsers();
   initSelects();
   initSetDate();
-  initDueDate();  
+  initDueDate();
   initHandlers();
 }
 
@@ -195,26 +198,28 @@ function initSelects() {
   let chooseHours = '\<option value=\"0\"\>Choose hours\<\/option\>\n';
 
   $('.edit-select').append(chooseHours);
-  
-  for (let value = 1; value <= HOURS_PER_DAY/HOUR_STEP; value++) {
+
+  for (let value = 1; value <= HOURS_PER_DAY / HOUR_STEP; value++) {
     $('.edit-select').append('\<option value=\"' + value + '\"\>' + (value * HOUR_STEP) + '\<\/option\>\n');
   }
 }
 
 function initSetDate() {
   // Update locale to have Monday be the start of the week
-  moment.updateLocale("en", { week: {
-    dow: 1, // First day of week is Monday
-    doy: 7  // First week of year must contain 1 January (7 + 1 - 1)
-  }});
-  
+  moment.updateLocale("en", {
+    week: {
+      dow: 1, // First day of week is Monday
+      doy: 7  // First week of year must contain 1 January (7 + 1 - 1)
+    }
+  });
+
   // Initialize datepickers
   $('#set-date').datetimepicker({
     inline: true,
     format: 'YYYY-MM-DD'
   });
 
-  $('#set-date').on('change.datetimepicker', function(event) {
+  $('#set-date').on('change.datetimepicker', function (event) {
     view($('#set-date').datetimepicker('date'));
   });
 }
@@ -226,7 +231,7 @@ function getDueDate() {
 
   // Assume end of period is the 15th
   let endOfPeriod = 15;
-  
+
   if (moment().date() > 15) {
     endOfPeriod = moment().endOf('month').date();
   }
@@ -284,12 +289,12 @@ function view(date) {
 
   // First clear everything out as if nothing has been set, then process record
   clear();
-  
+
   if (record) {
     $('.delete').prop('disabled', false).removeClass('btn-disabled disabled');
     $('#edit-activities').val(record.activities);
-    $('#edit-vacation').val(record.vacation/HOUR_STEP);
-    $('#edit-sick').val(record.sick/HOUR_STEP);
+    $('#edit-vacation').val(record.vacation / HOUR_STEP);
+    $('#edit-sick').val(record.sick / HOUR_STEP);
 
     if (record.holiday) {
       $('#edit-holiday').trigger('click');
@@ -306,20 +311,20 @@ function view(date) {
     if (record.times) {
       let times = JSON.parse(record.times);
 
-      times.forEach(function(value, index) {
-	$('#add').trigger('click');
-	let _times = JSON.parse(value);
-	
-	$('#a-' + index).datetimepicker('date', _times.arrive);
-	$('#l-' + index).datetimepicker('date', _times.leave);
-	$('#r-' + index).val(_times.rate);
+      times.forEach(function (value, index) {
+        $('#add').trigger('click');
+        let _times = JSON.parse(value);
 
-	if (_times.hoursType) {
-	  $('#ht-' + index).trigger('click');
-	}
-	else {
-	  $('#l-' + index).trigger('change');
-	}
+        $('#a-' + index).datetimepicker('date', _times.arrive);
+        $('#l-' + index).datetimepicker('date', _times.leave);
+        $('#r-' + index).val(_times.rate);
+
+        if (_times.hoursType) {
+          $('#ht-' + index).trigger('click');
+        }
+        else {
+          $('#l-' + index).trigger('change');
+        }
       });
     }
   }
@@ -349,22 +354,22 @@ function save() {
 
   let times = [];
 
-  $('.times').each(function(index) {
+  $('.times').each(function (index) {
     let _times = new Times(($('#ht-' + index).is(':checked')),
-			   ($('#a-' + index).datetimepicker('date').format('LT')),
-			   ($('#l-' + index).datetimepicker('date').format('LT')),
-			   ($('#r-' + index).val()));
+      ($('#a-' + index).datetimepicker('date').format('LT')),
+      ($('#l-' + index).datetimepicker('date').format('LT')),
+      ($('#r-' + index).val()));
 
     times.push(JSON.stringify(_times));
   });
 
   console.log($('#edit-vacation').val());
   let record = new Record((($('#edit-holiday').prop('checked')) ? HOURS_PER_DAY : 0),
-			  ($('#edit-activities').val()),
-			  (Number($('#edit-vacation').val()/(1/HOUR_STEP))),
-			  (Number($('#edit-sick').val()/(1/HOUR_STEP))),
-			  JSON.stringify(times));
-  
+    ($('#edit-activities').val()),
+    (Number($('#edit-vacation').val() / (1 / HOUR_STEP))),
+    (Number($('#edit-sick').val() / (1 / HOUR_STEP))),
+    JSON.stringify(times));
+
   localStorage.setItem(currentUser + currentDate, JSON.stringify(record));
 
   let status = '';
@@ -450,7 +455,7 @@ function addTimes() {
 
   // Enable removal of times
   $('#remove').prop('disabled', false).removeClass('btn-disabled');
-  
+
   $(arriveSelector).datetimepicker({
     format: 'LT',
     stepping: TIME_STEP
@@ -468,12 +473,12 @@ function addTimes() {
   $(leaveSelector).on('change.datetimepicker', editCheck);
 
   $(hoursTypeSelector).change(editCheck);
-  $(rateSelector).on('paste', function(event) {
+  $(rateSelector).on('paste', function (event) {
     event.preventDefault();
     editCheck(event);
   });
 
-  $(rateSelector).on('input', function(event) {
+  $(rateSelector).on('input', function (event) {
     if (event.originalEvent.inputType === 'insertFromPaste') {
       event.preventDefault();
     }
@@ -553,7 +558,7 @@ function addFees() {
 
   // Enable removal of fees
   $('#remove').prop('disabled', false).removeClass('btn-disabled');
-  
+
   $(arriveSelector).datetimepicker({
     format: 'LT',
     stepping: TIME_STEP
@@ -571,12 +576,12 @@ function addFees() {
   $(leaveSelector).on('change.datetimepicker', editCheck);
 
   $(hoursTypeSelector).change(editCheck);
-  $(rateSelector).on('paste', function(event) {
+  $(rateSelector).on('paste', function (event) {
     event.preventDefault();
     editCheck(event);
   });
 
-  $(rateSelector).on('input', function(event) {
+  $(rateSelector).on('input', function (event) {
     if (event.originalEvent.inputType === 'insertFromPaste') {
       event.preventDefault();
     }
@@ -614,7 +619,7 @@ function print() {
      previous:  Total regular and talent hours worked from Monday before start until start
      row: HTML for table row for date
    */
-  
+
   let [start, end] = getPayPeriod();
   let date = moment(start);  // Date being processed
   let holiday = 0;
@@ -645,7 +650,7 @@ function print() {
      */
     if (record) {
       let [_dayparts, _regular, _talent] = processTimes(JSON.parse(record.times));
-      
+
       holiday += Number(record.holiday);
       vacation += Number(record.vacation);
       sick += Number(record.sick);
@@ -656,25 +661,25 @@ function print() {
       weekly += _regular;
 
       /*
-	 Iterate over _talent to collect up all talent hours for the day and
-	 store them in talent for the overall pay period
+   Iterate over _talent to collect up all talent hours for the day and
+   store them in talent for the overall pay period
        */
-      _talent.forEach(function(value, key) {
-	if (talent.has(key)) {
-	  talent.set(key, talent.get(key) + value);
-	}
-	else {
-	  talent.set(key, value);
-	}
-	hours = Number(hours) + Number(value);
+      _talent.forEach(function (value, key) {
+        if (talent.has(key)) {
+          talent.set(key, talent.get(key) + value);
+        }
+        else {
+          talent.set(key, value);
+        }
+        hours = Number(hours) + Number(value);
       });
       hours = Number(hours) + Number(_regular + record.holiday + record.vacation + record.sick);
 
       // Generate notes
       if (_talent.size || record.vacation || record.sick) {
-	console.log(_talent);
-	notesHtml = processNotes(++notes, _talent, record.vacation, record.sick);
-	// hours += '\<sup\>' + notes + '\<\/sup\>';
+        console.log(_talent);
+        notesHtml = processNotes(++notes, _talent, record.vacation, record.sick);
+        // hours += '\<sup\>' + notes + '\<\/sup\>';
       }
     }
 
@@ -699,17 +704,17 @@ function print() {
        previous + weekly exceeds HOURS_PER_WORK_WEEK.  In this case, that means the first eight hours of weekly
        are just regular hours.  The remaiing four hours are overtime.
      */
-    
+
     if ((date.day()) === 0) {
       if ((previous + weekly) > HOURS_PER_WORK_WEEK) {
-	if (previous >= HOURS_PER_WORK_WEEK) {
-	  overtime += weekly;
-	  regular -= weekly;
-	}
-	else {
-	  overtime += (weekly + previous - HOURS_PER_WORK_WEEK);
-	  regular -= (weekly + previous - HOURS_PER_WORK_WEEK);
-	}
+        if (previous >= HOURS_PER_WORK_WEEK) {
+          overtime += weekly;
+          regular -= weekly;
+        }
+        else {
+          overtime += (weekly + previous - HOURS_PER_WORK_WEEK);
+          regular -= (weekly + previous - HOURS_PER_WORK_WEEK);
+        }
       }
       regular = regular < 0 ? 0 : regular;
       weekly = 0;
@@ -726,12 +731,12 @@ function print() {
 
     // Determine if we need to use a smaller font to fit dayparts in table cell
     let daypartsSize = '';
-    
+
     if (dayparts.length > 16) {
       daypartsSize = ' style=\"font-size:10px;text-align:left;vertical-align:top;\"';
     }
-    
-    row += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + daypartsSize +'>' + dayparts + '</td><td>' + hours + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
+
+    row += '<tr' + rowClass + '><td style=\"font-size:6mm;\">' + date.format('M/D') + '</td><td' + daypartsSize + '>' + dayparts + '</td><td>' + hours + '</td><td class=\"activitiesText\">' + activities + '</td></tr>';
     date.add(1, 'day');
   }
 
@@ -758,9 +763,9 @@ function print() {
 
     if (talent) {
       // totalHoursPaid += ' + ' + talent.toFixed(2) + 'R @ $' + rate.toFixed(2);
-      talent.forEach(function(value, key) {
-	totalHoursPaid += ' + ' + value.toFixed(2) + 'R @ $' + Number(key).toFixed(2);
-	totalHoursWorked += ' + ' + value.toFixed(2) + 'R';
+      talent.forEach(function (value, key) {
+        totalHoursPaid += ' + ' + value.toFixed(2) + 'R @ $' + Number(key).toFixed(2);
+        totalHoursWorked += ' + ' + value.toFixed(2) + 'R';
       });
     }
 
@@ -791,14 +796,14 @@ function updateStatus(msg) {
       $('#undo').hide();
       $('#status-msg').html(msg);
       $('#status-contents').fadeIn(200);
-      setTimeout( () => {$('#status-dismiss').click();}, UNDONE_TIMEOUT);
+      setTimeout(() => { $('#status-dismiss').click(); }, UNDONE_TIMEOUT);
     });
   }
   else {
     $('#undo').show();
     $('#status-msg').html(msg);
     $('#status').fadeIn(400);
-    setTimeout( () => {$('#status-dismiss').click();}, STATUS_TIMEOUT);
+    setTimeout(() => { $('#status-dismiss').click(); }, STATUS_TIMEOUT);
   }
 }
 
@@ -846,8 +851,8 @@ function processTimes(times) {
   let dayparts = '';
   let regular = 0;
   let talent = new Map();
-  
-  times.forEach(function(value, index) {
+
+  times.forEach(function (value, index) {
     let _times = JSON.parse(value);
 
     if (dayparts) {
@@ -856,11 +861,11 @@ function processTimes(times) {
     dayparts += formatDayparts(_times.arrive, _times.leave);
     if (_times.hoursType) {
       if (talent.has(_times.rate)) {
-	talent.set(_times.rate, talent.get(_times.rate) +
-				Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true)));
+        talent.set(_times.rate, talent.get(_times.rate) +
+          Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true)));
       }
       else {
-	talent.set(_times.rate, Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true)));
+        talent.set(_times.rate, Number(moment(_times.leave, 'LT').diff(moment(_times.arrive, 'LT'), 'hours', true)));
       }
     }
     else {
@@ -884,7 +889,7 @@ function formatDayparts(arrive, leave) {
   return dayparts;
 }
 
-$(function() {
+$(function () {
   init();
   view($('#set-date').datetimepicker('date'));
 });
