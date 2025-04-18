@@ -800,6 +800,13 @@ function deleteRecord() {
   undoData = new Undo('delete', record);
   localStorage.removeItem(currentUser + currentDate);
   updateStatus('Record deleted');
+
+  // Automatically download localStorage for backup purposes
+  const data = JSON.stringify(Object.entries(localStorage));
+  const currentTime = new Date(Date.now());
+
+  download(data, `Timesheet ${currentTime.toISOString()}.json`);
+  
   view(currentDate);
 }
 
