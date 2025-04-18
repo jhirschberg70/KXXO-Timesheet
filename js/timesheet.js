@@ -12,6 +12,13 @@ let dueDate;
 let undoData;
 let name;
 
+function download(data, fileName) {
+  let a = document.createElement("a");
+  a.download = fileName;
+  a.href = "data:plain/txt charset=utf-8," + data;
+  a.click();
+}
+
 function Record(holiday, activities, vacation, sick, times) {
   this.holiday = holiday;
   this.activities = activities;
@@ -385,6 +392,12 @@ function save() {
   }
 
   updateStatus(status);
+
+  // Automatically download localStorage for backup purposes
+  const data = JSON.stringify(Object.entries(localStorage));
+  const currentTime = new Date(Date.now());
+
+  download(data, `Timesheet ${currentTime.toISOString()}.json`);
 }
 
 function addTimes() {
@@ -687,7 +700,7 @@ function print() {
        in cases where the current pay period starts on a day other than Monday, the hours worked from the last Monday of the
        previous period until the start of the current period (previous) need to be taken into account for computing overtime.
        The total number of hours worked in a week is always previous + weekly, though previous will only be > 0 during
-       the first week of the current pay perdiod.  Overtime occurs when weekly + previous is > HOURS_PER_WORK_WEEK.
+       the first week of the current pay period.  Overtime occurs when weekly + previous is > HOURS_PER_WORK_WEEK.
        If previous is >= HOURS_PER_WORK_WEEK, then overtime is just equal to weekly and the overtime (weekly) should be 
        subtracted from regular.  Otherwise, overtime is equal to weekly + previous - HOURS_PER_WORK_WEEK, and this same
        amount should be subtracted from regular.  Here are a couple examples:
@@ -702,7 +715,7 @@ function print() {
        
        Total hours worked in the week is 44.  Since previous was < HOURS_PER_WORK_WEEK, no overtime occurs until
        previous + weekly exceeds HOURS_PER_WORK_WEEK.  In this case, that means the first eight hours of weekly
-       are just regular hours.  The remaiing four hours are overtime.
+       are just regular hours.  The remaining four hours are overtime.
      */
 
     if ((date.day()) === 0) {
